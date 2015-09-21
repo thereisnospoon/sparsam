@@ -33,4 +33,12 @@
 	</bean>
 
 	<bean id="jacksonMapper" class="com.fasterxml.jackson.databind.ObjectMapper"/>
+
+	<bean id="jedisConnectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
+		<property name="usePoll" value="true"/>
+	</bean>
+
+	<bean id="stringRedisTemplate" class="org.springframework.data.redis.core.StringRedisTemplate">
+		<property name="connectionFactory" ref="jedisConnectionFactory"/>
+	</bean>
 </beans>
