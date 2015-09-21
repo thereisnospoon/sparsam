@@ -72,7 +72,7 @@ public class ExpenseEntryDAOTest {
 		ExpenseEntry expenseEntry = createTestExpenseEntry();
 		expenseEntryDAO.create(expenseEntry);
 
-		ExpenseEntry retrievedExpenseEntry = expenseEntryDAO.loadEntry(expenseEntry);
+		ExpenseEntry retrievedExpenseEntry = expenseEntryDAO.loadAllEntryProperties(expenseEntry);
 		assertEquals(testExpenseEntryKey, retrievedExpenseEntry.getUniqueKey());
 		assertEquals(TEST_EXPENSE_AMOUNT, retrievedExpenseEntry.getAmount());
 	}

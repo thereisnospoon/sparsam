@@ -21,26 +21,24 @@ public class ExpenseEntryDAO implements GenericDAO<ExpenseEntry> {
 		this.redisHashOperations = redisHashOperations;
 	}
 
-
-
 	@Override
 	public ExpenseEntry getEntryByKey(String key) {
 		throw new UnsupportedOperationException();
 	}
 
-	public ExpenseEntry loadEntry(ExpenseEntry expenseEntry) {
+	public ExpenseEntry loadAllEntryProperties(ExpenseEntry expenseEntry) {
 
 		checkIfExpenseEntryCouldBeIdentified(expenseEntry);
-		return redisHashOperations.get(getFullRedisCollectionForExpensesName(expenseEntry.getUsername()), expenseEntry.getUniqueKey());
+		return redisHashOperations.get(getFullNameForRedisCollectionForExpenses(expenseEntry.getUsername()), expenseEntry.getUniqueKey());
 	}
 
 	public List<ExpenseEntry> getExpensesForUser(String username) {
 
 		Preconditions.checkArgument(!StringUtils.isEmpty(username));
-		return redisHashOperations.values(getFullRedisCollectionForExpensesName(username));
+		return redisHashOperations.values(getFullNameForRedisCollectionForExpenses(username));
 	}
 
-	private String getFullRedisCollectionForExpensesName(String username) {
+	private String getFullNameForRedisCollectionForExpenses(String username) {
 		return redisCollectionNamePrefixForEntries + username;
 	}
 
@@ -71,20 +69,20 @@ public class ExpenseEntryDAO implements GenericDAO<ExpenseEntry> {
 					"already exists", expenseEntry.getUniqueKey(), expenseEntry.getUsername()));
 		}
 
-		redisHashOperations.put(getFullRedisCollectionForExpensesName(expenseEntry.getUsername()), expenseEntry.getUniqueKey(), expenseEntry);
+		redisHashOperations.put(getFullNameForRedisCollectionForExpenses(expenseEntry.getUsername()), expenseEntry.getUniqueKey(), expenseEntry);
 	}
 
 	@Override
 	public boolean exists(ExpenseEntry expenseEntry) {
 
 		checkIfExpenseEntryCouldBeIdentified(expenseEntry);
-		return redisHashOperations.hasKey(getFullRedisCollectionForExpensesName(expenseEntry.getUsername()), expenseEntry.getUniqueKey());
+		return redisHashOperations.hasKey(getFullNameForRedisCollectionForExpenses(expenseEntry.getUsername()), expenseEntry.getUniqueKey());
 	}
 
 	@Override
 	public void delete(ExpenseEntry expenseEntry) {
 
 		checkIfExpenseEntryCouldBeIdentified(expenseEntry);
-		redisHashOperations.delete(getFullRedisCollectionForExpensesName(expenseEntry.getUsername()), expenseEntry.getUniqueKey());
+		redisHashOperations.delete(getFullNameForRedisCollectionForExpenses(expenseEntry.getUsername()), expenseEntry.getUniqueKey());
 	}
 }
