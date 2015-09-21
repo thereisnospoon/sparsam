@@ -53,4 +53,9 @@
 		<property name="redisCollectionNameForEntities" value="users"/>
 		<property name="redisHashOperations" ref="redisTemplate"/>
 	</bean>
+
+	<bean id="expenseEntryDAO" class="me.thereisnospoon.sparsam.dao.ExpenseEntryDAO">
+		<property name="redisCollectionNamePrefixForEntries" value="expensesOf:"/>
+		<property name="redisHashOperations" ref="redisTemplate"/>
+	</bean>
 </beans>

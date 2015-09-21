@@ -38,8 +38,9 @@ public class UserDAOTest {
 
 	private void deleteTestUserIfExists() {
 
-		if (userDAO.exists(TEST_USERNAME)) {
-			userDAO.delete(TEST_USERNAME);
+		User testUser = createTestUser();
+		if (userDAO.exists(testUser)) {
+			userDAO.delete(testUser);
 		}
 	}
 
@@ -54,7 +55,7 @@ public class UserDAOTest {
 		User testUser = createTestUser();
 		userDAO.create(testUser);
 
-		User userRetrievedFromStorage = userDAO.find(TEST_USERNAME);
+		User userRetrievedFromStorage = userDAO.getEntryByKey(TEST_USERNAME);
 
 		assertEquals(TEST_USERNAME, userRetrievedFromStorage.getUsername());
 		assertEquals(TEST_ENCODED_PASSWORD, userRetrievedFromStorage.getEncodedPassword());

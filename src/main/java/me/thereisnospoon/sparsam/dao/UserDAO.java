@@ -13,23 +13,22 @@ public class UserDAO implements GenericDAO<User> {
 	private String redisCollectionNameForEntities;
 	private HashOperations<String,String,User> redisHashOperations;
 
-	@Override
-	public void setRedisCollectionNameForEntities(String redisCollectionName) {
-		this.redisCollectionNameForEntities = redisCollectionName;
-	}
-
 	public void setRedisHashOperations(HashOperations<String, String, User> redisHashOperations) {
 		this.redisHashOperations = redisHashOperations;
 	}
 
+	public void setRedisCollectionNameForEntities(String redisCollectionNameForEntities) {
+		this.redisCollectionNameForEntities = redisCollectionNameForEntities;
+	}
+
 	@Override
-	public User find(final String username) {
+	public User getEntryByKey(final String username) {
 		return redisHashOperations.get(redisCollectionNameForEntities, username);
 	}
 
 	@Override
-	public boolean exists(final String username) {
-		return redisHashOperations.hasKey(redisCollectionNameForEntities, username);
+	public boolean exists(final User user) {
+		return redisHashOperations.hasKey(redisCollectionNameForEntities, user.getUsername());
 	}
 
 	private void checkIfUserValidForStorage(final User user) {
@@ -42,7 +41,7 @@ public class UserDAO implements GenericDAO<User> {
 	public void create(final User user) {
 
 		checkIfUserValidForStorage(user);
-		if (exists(user.getUsername())) {
+		if (exists(user)) {
 			throw new EntityAlreadyExistsException(String.format("User with name: '%s' already exists", user.getUsername()));
 		}
 
@@ -50,9 +49,9 @@ public class UserDAO implements GenericDAO<User> {
 	}
 
 	@Override
-	public void delete(final String username) {
+	public void delete(final User user) {
 
-		Preconditions.checkArgument(!StringUtils.isEmpty(username), ERROR_MESSAGE_FOR_USERNAME_EMPTY_CHECK);
-		redisHashOperations.delete(redisCollectionNameForEntities, username);
+		Preconditions.checkArgument(!StringUtils.isEmpty(user.getUsername()), ERROR_MESSAGE_FOR_USERNAME_EMPTY_CHECK);
+		redisHashOperations.delete(redisCollectionNameForEntities, user.getUsername());
 	}
 }

@@ -2,13 +2,11 @@ package me.thereisnospoon.sparsam.dao;
 
 public interface GenericDAO<T> {
 
-	void setRedisCollectionNameForEntities(final String redisCollectionName);
+	T getEntryByKey(final String key);
 
-	T find(final String key);
-
-	boolean exists(final String key);
+	boolean exists(final T entry);
 
 	void create(final T entity);
 
-	void delete(final String key);
+	void delete(final T entity);
 }
