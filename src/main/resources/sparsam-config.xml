@@ -35,10 +35,22 @@
 	<bean id="jacksonMapper" class="com.fasterxml.jackson.databind.ObjectMapper"/>
 
 	<bean id="jedisConnectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
-		<property name="usePoll" value="true"/>
+		<property name="usePool" value="true"/>
 	</bean>
 
-	<bean id="stringRedisTemplate" class="org.springframework.data.redis.core.StringRedisTemplate">
+	<bean id="genericJackson2JsonRedisSerializer" class="org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer"/>
+
+	<bean id="stringRedisSerializer" class="org.springframework.data.redis.serializer.StringRedisSerializer"/>
+
+	<bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate">
 		<property name="connectionFactory" ref="jedisConnectionFactory"/>
+		<property name="defaultSerializer" ref="genericJackson2JsonRedisSerializer"/>
+		<property name="keySerializer" ref="stringRedisSerializer"/>
+		<property name="hashKeySerializer" ref="stringRedisSerializer"/>
+	</bean>
+
+	<bean id="userDAO" class="me.thereisnospoon.sparsam.dao.UserDAO">
+		<property name="redisCollectionNameForEntities" value="users"/>
+		<property name="redisHashOperations" ref="redisTemplate"/>
 	</bean>
 </beans>
