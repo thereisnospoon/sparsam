@@ -55,7 +55,7 @@ public class UserDAOTest {
 		User testUser = createTestUser();
 		userDAO.create(testUser);
 
-		User userRetrievedFromStorage = userDAO.getEntryByKey(TEST_USERNAME);
+		User userRetrievedFromStorage = userDAO.getUserByUsername(TEST_USERNAME);
 
 		assertEquals(TEST_USERNAME, userRetrievedFromStorage.getUsername());
 		assertEquals(TEST_ENCODED_PASSWORD, userRetrievedFromStorage.getEncodedPassword());

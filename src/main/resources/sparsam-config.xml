@@ -49,12 +49,12 @@
 		<property name="hashKeySerializer" ref="stringRedisSerializer"/>
 	</bean>
 
-	<bean id="userDAO" class="me.thereisnospoon.sparsam.dao.UserDAO">
+	<bean id="userDAO" class="me.thereisnospoon.sparsam.dao.impl.UserDAOImpl">
 		<property name="redisCollectionNameForEntities" value="users"/>
 		<property name="redisHashOperations" ref="redisTemplate"/>
 	</bean>
 
-	<bean id="expenseEntryDAO" class="me.thereisnospoon.sparsam.dao.ExpenseEntryDAO">
+	<bean id="expenseEntryDAO" class="me.thereisnospoon.sparsam.dao.impl.ExpenseEntryDAOImpl">
 		<property name="redisCollectionNamePrefixForEntries" value="expensesOf:"/>
 		<property name="redisHashOperations" ref="redisTemplate"/>
 	</bean>

@@ -1,88 +1,17 @@
 package me.thereisnospoon.sparsam.dao;
 
-import com.google.common.base.Preconditions;
-import me.thereisnospoon.sparsam.exceptions.dao.EntityAlreadyExistsException;
 import me.thereisnospoon.sparsam.vo.ExpenseEntry;
-import org.springframework.data.redis.core.HashOperations;
-import org.springframework.util.StringUtils;
-
 import java.util.List;
 
-public class ExpenseEntryDAO implements GenericDAO<ExpenseEntry> {
+public interface ExpenseEntryDAO {
 
-	private String redisCollectionNamePrefixForEntries;
-	private HashOperations<String,String,ExpenseEntry> redisHashOperations;
+	ExpenseEntry getExpenseEntryByUsernameAndKey(String parentUsername, String key);
 
-	public void setRedisCollectionNamePrefixForEntries(String redisCollectionNamePrefixForEntries) {
-		this.redisCollectionNamePrefixForEntries = redisCollectionNamePrefixForEntries;
-	}
+	List<ExpenseEntry> getExpensesForUser(String username);
 
-	public void setRedisHashOperations(HashOperations<String, String, ExpenseEntry> redisHashOperations) {
-		this.redisHashOperations = redisHashOperations;
-	}
+	void create(ExpenseEntry expenseEntry);
 
-	@Override
-	public ExpenseEntry getEntryByKey(String key) {
-		throw new UnsupportedOperationException();
-	}
+	boolean exists(ExpenseEntry expenseEntry);
 
-	public ExpenseEntry loadAllEntryProperties(ExpenseEntry expenseEntry) {
-
-		checkIfExpenseEntryCouldBeIdentified(expenseEntry);
-		return redisHashOperations.get(getFullNameForRedisCollectionForExpenses(expenseEntry.getUsername()), expenseEntry.getUniqueKey());
-	}
-
-	public List<ExpenseEntry> getExpensesForUser(String username) {
-
-		Preconditions.checkArgument(!StringUtils.isEmpty(username));
-		return redisHashOperations.values(getFullNameForRedisCollectionForExpenses(username));
-	}
-
-	private String getFullNameForRedisCollectionForExpenses(String username) {
-		return redisCollectionNamePrefixForEntries + username;
-	}
-
-	private void checkIfExpenseEntryCouldBeIdentified(ExpenseEntry expenseEntry) {
-
-		Preconditions.checkNotNull(expenseEntry);
-		Preconditions.checkArgument(!StringUtils.isEmpty(expenseEntry.getUsername()));
-		Preconditions.checkArgument(!StringUtils.isEmpty(expenseEntry.getUniqueKey()));
-	}
-
-	private void checkIfExpenseEntryIsValidForStorage(ExpenseEntry expenseEntry) {
-
-		checkIfExpenseEntryCouldBeIdentified(expenseEntry);
-
-		Preconditions.checkNotNull(expenseEntry.getCurrency());
-		Preconditions.checkNotNull(expenseEntry.getDateOfExpense());
-		Preconditions.checkArgument(!StringUtils.isEmpty(expenseEntry.getDescription()));
-		Preconditions.checkNotNull(expenseEntry.getAmount());
-	}
-
-	@Override
-	public void create(ExpenseEntry expenseEntry) {
-
-		checkIfExpenseEntryIsValidForStorage(expenseEntry);
-
-		if (exists(expenseEntry)) {
-			throw new EntityAlreadyExistsException(String.format("Expense entry with key '%s' for user '%s' " +
-					"already exists", expenseEntry.getUniqueKey(), expenseEntry.getUsername()));
-		}
-
-		redisHashOperations.put(getFullNameForRedisCollectionForExpenses(expenseEntry.getUsername()), expenseEntry.getUniqueKey(), expenseEntry);
-	}
-
-	@Override
-	public boolean exists(ExpenseEntry expenseEntry) {
-
-		checkIfExpenseEntryCouldBeIdentified(expenseEntry);
-		return redisHashOperations.hasKey(getFullNameForRedisCollectionForExpenses(expenseEntry.getUsername()), expenseEntry.getUniqueKey());
-	}
-
-	@Override
-	public void delete(ExpenseEntry expenseEntry) {
-
-		checkIfExpenseEntryCouldBeIdentified(expenseEntry);
-		redisHashOperations.delete(getFullNameForRedisCollectionForExpenses(expenseEntry.getUsername()), expenseEntry.getUniqueKey());
-	}
+	void delete(ExpenseEntry expenseEntry);
 }
