@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Currency;
 import java.util.List;
 import java.util.UUID;
@@ -44,7 +44,7 @@ public class ExpenseEntryDAOTest {
 
 		Expense expense = new Expense();
 
-		expenseEntry.setDateOfExpense(LocalDate.now());
+		expenseEntry.setDateOfExpense(LocalDateTime.now());
 		expenseEntry.setUniqueKey(testExpenseEntryKey);
 
 		expense.setAmount(TEST_EXPENSE_AMOUNT);

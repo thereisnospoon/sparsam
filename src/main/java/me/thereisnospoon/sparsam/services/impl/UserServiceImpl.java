@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -44,7 +44,7 @@ public class UserServiceImpl implements UserService {
 		ExpenseEntry expenseEntry = new ExpenseEntry();
 		expenseEntry.setExpense(expense);
 		expenseEntry.setUsername(username);
-		expenseEntry.setDateOfExpense(LocalDate.now());
+		expenseEntry.setDateOfExpense(LocalDateTime.now());
 		expenseEntry.setUniqueKey(generateUniqueKey());
 
 		expenseEntryDAO.create(expenseEntry);

@@ -2,21 +2,22 @@ package me.thereisnospoon.sparsam.vo;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class ExpenseEntry {
 
 	private String uniqueKey;
 	private String username;
 
+	@JsonSerialize(using = LocalDateTimeSerializer.class)
+	@JsonDeserialize(using = LocalDateTimeDeserializer.class)
+	private LocalDateTime dateOfExpense;
+
 	private Expense expense;
 
-	@JsonSerialize(using = LocalDateSerializer.class)
-	@JsonDeserialize(using = LocalDateDeserializer.class)
-	private LocalDate dateOfExpense;
 
 	public String getUniqueKey() {
 		return uniqueKey;
@@ -34,11 +35,11 @@ public class ExpenseEntry {
 		this.username = username;
 	}
 
-	public LocalDate getDateOfExpense() {
+	public LocalDateTime getDateOfExpense() {
 		return dateOfExpense;
 	}
 
-	public void setDateOfExpense(LocalDate dateOfExpense) {
+	public void setDateOfExpense(LocalDateTime dateOfExpense) {
 		this.dateOfExpense = dateOfExpense;
 	}
 

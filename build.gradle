@@ -10,6 +10,7 @@ repositories {
 def springVersion = '4.1.6.RELEASE'
 def jacksonVersion = '2.6.2'
 def springSecurityVersion = '4.0.1.RELEASE'
+def luceneVersion = '5.3.0'
 
 dependencies {
 
@@ -31,7 +32,11 @@ dependencies {
             "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}",
             "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}",
 
-            'redis.clients:jedis:2.7.3'
+            'redis.clients:jedis:2.7.3',
+
+            "org.apache.lucene:lucene-core:${luceneVersion}",
+            "org.apache.lucene:lucene-analyzers-common:${luceneVersion}",
+            "org.apache.lucene:lucene-queryparser:${luceneVersion}"
 
     testCompile 'junit:junit:4.11',
             "org.springframework:spring-test:${springVersion}"
