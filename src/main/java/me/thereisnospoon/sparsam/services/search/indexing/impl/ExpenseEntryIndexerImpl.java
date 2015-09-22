@@ -6,9 +6,11 @@ import me.thereisnospoon.sparsam.vo.ExpenseEntry;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexWriter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 
+@Service
 public class ExpenseEntryIndexerImpl implements ExpenseEntryIndexer {
 
 	@Autowired
@@ -19,7 +21,7 @@ public class ExpenseEntryIndexerImpl implements ExpenseEntryIndexer {
 
 		Document document = new Document();
 		Arrays.asList(ExpenseEntryFieldsForIndexing.values()).forEach(expenseEntryFieldsForIndexing ->
-				document.add(expenseEntryFieldsForIndexing.getField(expenseEntry)));
+				document.add(expenseEntryFieldsForIndexing.getLuceneField(expenseEntry)));
 	}
 
 	@Override

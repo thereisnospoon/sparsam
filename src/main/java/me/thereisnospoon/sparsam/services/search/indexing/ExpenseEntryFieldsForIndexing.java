@@ -11,20 +11,20 @@ public enum ExpenseEntryFieldsForIndexing {
 	USERNAME("username") {
 
 		@Override
-		public Field getField(ExpenseEntry expenseEntry) {
+		public Field getLuceneField(ExpenseEntry expenseEntry) {
 
 			ExpenseCompositeKey expenseCompositeKey = expenseEntry.getExpenseCompositeKey();
-			return new StringField(this.fieldNameInIndex, expenseCompositeKey.getUsername(), Field.Store.NO);
+			return new StringField(getFieldNameInIndex(), expenseCompositeKey.getUsername(), Field.Store.NO);
 		}
 	},
 
 	UNIQUE_KEY("key") {
 
 		@Override
-		public Field getField(ExpenseEntry expenseEntry) {
+		public Field getLuceneField(ExpenseEntry expenseEntry) {
 
 			ExpenseCompositeKey expenseCompositeKey = expenseEntry.getExpenseCompositeKey();
-			return new StringField(this.fieldNameInIndex, expenseCompositeKey.getUniqueKey(), Field.Store.NO);
+			return new StringField(getFieldNameInIndex(), expenseCompositeKey.getUniqueKey(), Field.Store.NO);
 		}
 	},
 
@@ -40,42 +40,46 @@ public enum ExpenseEntryFieldsForIndexing {
 		}
 
 		@Override
-		public Field getField(ExpenseEntry expenseEntry) {
+		public Field getLuceneField(ExpenseEntry expenseEntry) {
 
 			Long dateOfExpense = getDateOfExpenseInMilliseconds(expenseEntry);
-			return new LongField(this.fieldNameInIndex, dateOfExpense, Field.Store.NO);
+			return new LongField(getFieldNameInIndex(), dateOfExpense, Field.Store.NO);
 		}
 	},
 
 	AMOUNT("amount") {
 
 		@Override
-		public Field getField(ExpenseEntry expenseEntry) {
-			return new DoubleField(this.fieldNameInIndex, expenseEntry.getExpense().getAmount(), Field.Store.NO);
+		public Field getLuceneField(ExpenseEntry expenseEntry) {
+			return new DoubleField(getFieldNameInIndex(), expenseEntry.getExpense().getAmount(), Field.Store.NO);
 		}
 	},
 
 	CURRENCY("currency") {
 		@Override
-		public Field getField(ExpenseEntry expenseEntry) {
-			return new StringField(this.fieldNameInIndex, expenseEntry.getExpense().getCurrency().getCurrencyCode(), Field.Store.NO);
+		public Field getLuceneField(ExpenseEntry expenseEntry) {
+			return new StringField(getFieldNameInIndex(), expenseEntry.getExpense().getCurrency().getCurrencyCode(), Field.Store.NO);
 		}
 	},
 
 	DESCRIPTION("description") {
 
 		@Override
-		public Field getField(ExpenseEntry expenseEntry) {
-			return new TextField(this.fieldNameInIndex, expenseEntry.getExpense().getDescription(), Field.Store.NO);
+		public Field getLuceneField(ExpenseEntry expenseEntry) {
+			return new TextField(getFieldNameInIndex(), expenseEntry.getExpense().getDescription(), Field.Store.NO);
 		}
 	};
 
-	String fieldNameInIndex;
+	private String fieldNameInIndex;
 
 	ExpenseEntryFieldsForIndexing(String fieldNameInIndex) {
 
 		this.fieldNameInIndex = fieldNameInIndex;
 	}
 
-	public abstract Field getField(ExpenseEntry expenseEntry);
+	public abstract Field getLuceneField(ExpenseEntry expenseEntry);
+
+	public String getFieldNameInIndex() {
+		return this.fieldNameInIndex;
+	}
 }
