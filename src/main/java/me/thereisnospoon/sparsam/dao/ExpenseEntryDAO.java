@@ -14,4 +14,6 @@ public interface ExpenseEntryDAO {
 	boolean exists(ExpenseEntry expenseEntry);
 
 	void delete(ExpenseEntry expenseEntry);
+
+	void update(ExpenseEntry expenseEntry);
 }

@@ -23,26 +23,26 @@ public class UserDAOImpl implements UserDAO {
 	}
 
 	@Override
-	public User getUserByUsername(final String username) {
+	public User getUserByUsername(String username) {
 		return redisHashOperations.get(redisCollectionNameForEntities, username);
 	}
 
 	@Override
-	public boolean exists(final User user) {
-		return redisHashOperations.hasKey(redisCollectionNameForEntities, user.getUsername());
+	public boolean exists(String username) {
+		return redisHashOperations.hasKey(redisCollectionNameForEntities, username);
 	}
 
-	private void checkIfUserValidForStorage(final User user) {
+	private void checkIfUserValidForStorage(User user) {
 
 		Preconditions.checkNotNull(user);
 		Preconditions.checkArgument(!StringUtils.isEmpty(user.getUsername()), ERROR_MESSAGE_FOR_USERNAME_EMPTY_CHECK);
 	}
 
 	@Override
-	public void create(final User user) {
+	public void create(User user) {
 
 		checkIfUserValidForStorage(user);
-		if (exists(user)) {
+		if (exists(user.getUsername())) {
 			throw new EntityAlreadyExistsException(String.format("User with name: '%s' already exists", user.getUsername()));
 		}
 
@@ -50,7 +50,7 @@ public class UserDAOImpl implements UserDAO {
 	}
 
 	@Override
-	public void delete(final User user) {
+	public void delete(User user) {
 
 		Preconditions.checkArgument(!StringUtils.isEmpty(user.getUsername()), ERROR_MESSAGE_FOR_USERNAME_EMPTY_CHECK);
 		redisHashOperations.delete(redisCollectionNameForEntities, user.getUsername());

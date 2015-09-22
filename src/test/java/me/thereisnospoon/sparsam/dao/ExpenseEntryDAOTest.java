@@ -1,6 +1,7 @@
 package me.thereisnospoon.sparsam.dao;
 
 import me.thereisnospoon.sparsam.exceptions.dao.EntityAlreadyExistsException;
+import me.thereisnospoon.sparsam.vo.Expense;
 import me.thereisnospoon.sparsam.vo.ExpenseEntry;
 import org.junit.After;
 import org.junit.Before;
@@ -24,6 +25,7 @@ public class ExpenseEntryDAOTest {
 
 	private static final String TEST_USERNAME = "testuser2";
 	private static final Double TEST_EXPENSE_AMOUNT = 10.;
+	private static final Double TEST_UPDATED_EXPENSE_AMOUNT = 10.;
 
 	private static String testExpenseEntryKey;
 
@@ -39,11 +41,17 @@ public class ExpenseEntryDAOTest {
 
 		ExpenseEntry expenseEntry = new ExpenseEntry();
 		expenseEntry.setUsername(TEST_USERNAME);
-		expenseEntry.setAmount(TEST_EXPENSE_AMOUNT);
-		expenseEntry.setCurrency(Currency.getInstance("USD"));
+
+		Expense expense = new Expense();
+
 		expenseEntry.setDateOfExpense(LocalDate.now());
 		expenseEntry.setUniqueKey(testExpenseEntryKey);
-		expenseEntry.setDescription("some description");
+
+		expense.setAmount(TEST_EXPENSE_AMOUNT);
+		expense.setCurrency(Currency.getInstance("USD"));
+		expense.setDescription("some description");
+
+		expenseEntry.setExpense(expense);
 
 		return expenseEntry;
 	}
@@ -76,7 +84,7 @@ public class ExpenseEntryDAOTest {
 				.getExpenseEntryByUsernameAndKey(expenseEntry.getUsername(), expenseEntry.getUniqueKey());
 
 		assertEquals(testExpenseEntryKey, retrievedExpenseEntry.getUniqueKey());
-		assertEquals(TEST_EXPENSE_AMOUNT, retrievedExpenseEntry.getAmount());
+		assertEquals(TEST_EXPENSE_AMOUNT, retrievedExpenseEntry.getExpense().getAmount());
 	}
 
 	@Test(expected = EntityAlreadyExistsException.class)
@@ -110,5 +118,26 @@ public class ExpenseEntryDAOTest {
 
 		List<ExpenseEntry> testUserExpensesAfterAllDeleted = expenseEntryDAO.getExpensesForUser(TEST_USERNAME);
 		assertEquals(0, testUserExpensesAfterAllDeleted.size());
+	}
+
+	@Test
+	public void testExpenseEntryUpdate() {
+
+		ExpenseEntry expenseEntry = createTestExpenseEntry();
+		expenseEntryDAO.create(expenseEntry);
+
+		ExpenseEntry expenseEntryRetrievedFromDB = expenseEntryDAO
+				.getExpenseEntryByUsernameAndKey(TEST_USERNAME, testExpenseEntryKey);
+
+		assertEquals(TEST_EXPENSE_AMOUNT, expenseEntryRetrievedFromDB.getExpense().getAmount());
+
+		Expense expenseToUpdate = expenseEntry.getExpense();
+		expenseToUpdate.setAmount(TEST_UPDATED_EXPENSE_AMOUNT);
+
+		expenseEntryDAO.update(expenseEntry);
+		ExpenseEntry expenseEntryRetrievedFromDBAfterUpdate = expenseEntryDAO
+				.getExpenseEntryByUsernameAndKey(TEST_USERNAME, testExpenseEntryKey);
+
+		assertEquals(TEST_UPDATED_EXPENSE_AMOUNT, expenseEntryRetrievedFromDBAfterUpdate.getExpense().getAmount());
 	}
 }

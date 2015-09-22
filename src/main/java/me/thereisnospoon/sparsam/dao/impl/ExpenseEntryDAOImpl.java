@@ -3,6 +3,8 @@ package me.thereisnospoon.sparsam.dao.impl;
 import com.google.common.base.Preconditions;
 import me.thereisnospoon.sparsam.dao.ExpenseEntryDAO;
 import me.thereisnospoon.sparsam.exceptions.dao.EntityAlreadyExistsException;
+import me.thereisnospoon.sparsam.exceptions.dao.NoSuchEntityException;
+import me.thereisnospoon.sparsam.vo.Expense;
 import me.thereisnospoon.sparsam.vo.ExpenseEntry;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.util.StringUtils;
@@ -48,11 +50,14 @@ public class ExpenseEntryDAOImpl implements ExpenseEntryDAO {
 	private void checkIfExpenseEntryIsValidForStorage(ExpenseEntry expenseEntry) {
 
 		checkExpenseUsernameAndKeyNotEmpty(expenseEntry.getUsername(), expenseEntry.getUniqueKey());
-
-		Preconditions.checkNotNull(expenseEntry.getCurrency());
 		Preconditions.checkNotNull(expenseEntry.getDateOfExpense());
-		Preconditions.checkArgument(!StringUtils.isEmpty(expenseEntry.getDescription()));
-		Preconditions.checkNotNull(expenseEntry.getAmount());
+
+		Expense expense = expenseEntry.getExpense();
+
+		Preconditions.checkNotNull(expense);
+		Preconditions.checkNotNull(expense.getCurrency());
+		Preconditions.checkArgument(!StringUtils.isEmpty(expense.getDescription()));
+		Preconditions.checkNotNull(expense.getAmount());
 	}
 
 	@Override
@@ -80,5 +85,17 @@ public class ExpenseEntryDAOImpl implements ExpenseEntryDAO {
 
 		checkExpenseUsernameAndKeyNotEmpty(expenseEntry.getUsername(), expenseEntry.getUniqueKey());
 		redisHashOperations.delete(getFullNameForRedisCollectionForExpenses(expenseEntry.getUsername()), expenseEntry.getUniqueKey());
+	}
+
+	@Override
+	public void update(ExpenseEntry expenseEntry) {
+
+		checkExpenseUsernameAndKeyNotEmpty(expenseEntry.getUsername(), expenseEntry.getUniqueKey());
+		if (!exists(expenseEntry)) {
+			throw new NoSuchEntityException("There is no expense entry with key '%s' for user '%s' in DB");
+		}
+
+		redisHashOperations.put(getFullNameForRedisCollectionForExpenses(expenseEntry.getUsername()),
+				expenseEntry.getUniqueKey(), expenseEntry);
 	}
 }

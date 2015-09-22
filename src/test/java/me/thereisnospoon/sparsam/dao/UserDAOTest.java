@@ -39,7 +39,7 @@ public class UserDAOTest {
 	private void deleteTestUserIfExists() {
 
 		User testUser = createTestUser();
-		if (userDAO.exists(testUser)) {
+		if (userDAO.exists(testUser.getUsername())) {
 			userDAO.delete(testUser);
 		}
 	}

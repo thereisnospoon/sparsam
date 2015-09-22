@@ -58,4 +58,6 @@
 		<property name="redisCollectionNamePrefixForEntries" value="expensesOf:"/>
 		<property name="redisHashOperations" ref="redisTemplate"/>
 	</bean>
+
+	<bean name="bcryptEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
 </beans>
