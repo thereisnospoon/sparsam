@@ -2,6 +2,7 @@ package me.thereisnospoon.sparsam.services;
 
 import me.thereisnospoon.sparsam.dao.ExpenseEntryDAO;
 import me.thereisnospoon.sparsam.dao.UserDAO;
+import me.thereisnospoon.sparsam.services.entities.UserService;
 import me.thereisnospoon.sparsam.vo.Expense;
 import me.thereisnospoon.sparsam.vo.ExpenseEntry;
 import me.thereisnospoon.sparsam.vo.User;

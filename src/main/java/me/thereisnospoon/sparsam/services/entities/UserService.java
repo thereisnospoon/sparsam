@@ -1,4 +1,4 @@
-package me.thereisnospoon.sparsam.services;
+package me.thereisnospoon.sparsam.services.entities;
 
 import me.thereisnospoon.sparsam.vo.Expense;
 import me.thereisnospoon.sparsam.vo.ExpenseEntry;

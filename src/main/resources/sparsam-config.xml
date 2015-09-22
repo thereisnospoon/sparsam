@@ -60,4 +60,20 @@
 	</bean>
 
 	<bean name="bcryptEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+
+	<!-- Indexing config-->
+	<bean id="defaultAnalyzer" class="org.apache.lucene.analysis.standard.StandardAnalyzer"/>
+
+	<bean id="indexWriterConfig" class="org.apache.lucene.index.IndexWriterConfig">
+		<constructor-arg ref="defaultAnalyzer"/>
+	</bean>
+
+	<bean id="inMemoryDirectory" class="org.apache.lucene.store.RAMDirectory"/>
+
+	<bean id="indexWriter" class="org.apache.lucene.index.IndexWriter">
+		<constructor-arg ref="inMemoryDirectory"/>
+		<constructor-arg ref="indexWriterConfig"/>
+	</bean>
+
+	<bean id="indexReader" factory-bean="indexWriter" factory-method="getReader"/>
 </beans>

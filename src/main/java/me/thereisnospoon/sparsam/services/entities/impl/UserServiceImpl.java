@@ -1,8 +1,8 @@
-package me.thereisnospoon.sparsam.services.impl;
+package me.thereisnospoon.sparsam.services.entities.impl;
 
 import me.thereisnospoon.sparsam.dao.ExpenseEntryDAO;
 import me.thereisnospoon.sparsam.dao.UserDAO;
-import me.thereisnospoon.sparsam.services.UserService;
+import me.thereisnospoon.sparsam.services.entities.UserService;
 import me.thereisnospoon.sparsam.vo.Expense;
 import me.thereisnospoon.sparsam.vo.ExpenseEntry;
 import me.thereisnospoon.sparsam.vo.User;
@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Service
@@ -44,7 +44,7 @@ public class UserServiceImpl implements UserService {
 		ExpenseEntry expenseEntry = new ExpenseEntry();
 		expenseEntry.setExpense(expense);
 		expenseEntry.setUsername(username);
-		expenseEntry.setDateOfExpense(LocalDateTime.now());
+		expenseEntry.setDateOfExpense(Instant.now());
 		expenseEntry.setUniqueKey(generateUniqueKey());
 
 		expenseEntryDAO.create(expenseEntry);
