@@ -1,6 +1,7 @@
 package me.thereisnospoon.sparsam.services.entities;
 
 import me.thereisnospoon.sparsam.vo.Expense;
+import me.thereisnospoon.sparsam.vo.ExpenseCompositeKey;
 import me.thereisnospoon.sparsam.vo.ExpenseEntry;
 import me.thereisnospoon.sparsam.vo.User;
 
@@ -12,5 +13,5 @@ public interface UserService {
 
 	ExpenseEntry addExpenseEntryForUser(Expense expense, String username);
 
-	void updateExpenseEntryForUser(String username, String expenseEntryKey, Expense updatedExpense);
+	void updateExpenseEntryForUser(ExpenseCompositeKey expenseCompositeKey, Expense updatedExpense);
 }

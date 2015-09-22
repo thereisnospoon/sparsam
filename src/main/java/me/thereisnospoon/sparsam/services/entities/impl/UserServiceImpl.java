@@ -4,13 +4,13 @@ import me.thereisnospoon.sparsam.dao.ExpenseEntryDAO;
 import me.thereisnospoon.sparsam.dao.UserDAO;
 import me.thereisnospoon.sparsam.services.entities.UserService;
 import me.thereisnospoon.sparsam.vo.Expense;
+import me.thereisnospoon.sparsam.vo.ExpenseCompositeKey;
 import me.thereisnospoon.sparsam.vo.ExpenseEntry;
 import me.thereisnospoon.sparsam.vo.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.UUID;
 
 @Service
@@ -42,10 +42,13 @@ public class UserServiceImpl implements UserService {
 	public ExpenseEntry addExpenseEntryForUser(Expense expense, String username) {
 
 		ExpenseEntry expenseEntry = new ExpenseEntry();
+
+		ExpenseCompositeKey expenseCompositeKey = new ExpenseCompositeKey();
+		expenseCompositeKey.setUsername(username);
+		expenseCompositeKey.setUniqueKey(generateUniqueKey());
+
 		expenseEntry.setExpense(expense);
-		expenseEntry.setUsername(username);
-		expenseEntry.setDateOfExpense(Instant.now());
-		expenseEntry.setUniqueKey(generateUniqueKey());
+		expenseEntry.setExpenseCompositeKey(expenseCompositeKey);
 
 		expenseEntryDAO.create(expenseEntry);
 		return expenseEntry;
@@ -56,11 +59,10 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public void updateExpenseEntryForUser(String username, String expenseEntryKey, Expense updatedExpense) {
+	public void updateExpenseEntryForUser(ExpenseCompositeKey expenseCompositeKey, Expense updatedExpense) {
 
 		ExpenseEntry expenseEntry = new ExpenseEntry();
-		expenseEntry.setUsername(username);
-		expenseEntry.setUniqueKey(expenseEntryKey);
+		expenseEntry.setExpenseCompositeKey(expenseCompositeKey);
 		expenseEntry.setExpense(updatedExpense);
 
 		expenseEntryDAO.update(expenseEntry);

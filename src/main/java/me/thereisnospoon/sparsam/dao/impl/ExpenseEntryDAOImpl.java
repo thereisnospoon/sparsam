@@ -5,6 +5,7 @@ import me.thereisnospoon.sparsam.dao.ExpenseEntryDAO;
 import me.thereisnospoon.sparsam.exceptions.dao.EntityAlreadyExistsException;
 import me.thereisnospoon.sparsam.exceptions.dao.NoSuchEntityException;
 import me.thereisnospoon.sparsam.vo.Expense;
+import me.thereisnospoon.sparsam.vo.ExpenseCompositeKey;
 import me.thereisnospoon.sparsam.vo.ExpenseEntry;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.util.StringUtils;
@@ -25,10 +26,11 @@ public class ExpenseEntryDAOImpl implements ExpenseEntryDAO {
 	}
 
 	@Override
-	public ExpenseEntry getExpenseEntryByUsernameAndKey(String parentUsername, String key) {
+	public ExpenseEntry getExpenseEntryByCompositeKey(ExpenseCompositeKey expenseCompositeKey) {
 
-		checkExpenseUsernameAndKeyNotEmpty(parentUsername, key);
-		return redisHashOperations.get(getFullNameForRedisCollectionForExpenses(parentUsername), key);
+		checkExpenseCompositeKey(expenseCompositeKey);
+		return redisHashOperations.get(getFullNameForRedisCollectionForExpenses(expenseCompositeKey.getUsername()),
+				expenseCompositeKey.getUniqueKey());
 	}
 
 	public List<ExpenseEntry> getExpensesForUser(String username) {
@@ -41,19 +43,19 @@ public class ExpenseEntryDAOImpl implements ExpenseEntryDAO {
 		return redisCollectionNamePrefixForEntries + parentUsername;
 	}
 
-	private void checkExpenseUsernameAndKeyNotEmpty(String parentUsername, String key) {
+	private void checkExpenseCompositeKey(ExpenseCompositeKey expenseCompositeKey) {
 
-		Preconditions.checkArgument(!StringUtils.isEmpty(parentUsername));
-		Preconditions.checkArgument(!StringUtils.isEmpty(key));
+		Preconditions.checkArgument(!StringUtils.isEmpty(expenseCompositeKey.getUsername()));
+		Preconditions.checkArgument(!StringUtils.isEmpty(expenseCompositeKey.getUniqueKey()));
 	}
 
 	private void checkIfExpenseEntryIsValidForStorage(ExpenseEntry expenseEntry) {
 
-		checkExpenseUsernameAndKeyNotEmpty(expenseEntry.getUsername(), expenseEntry.getUniqueKey());
-		Preconditions.checkNotNull(expenseEntry.getDateOfExpense());
+		checkExpenseCompositeKey(expenseEntry.getExpenseCompositeKey());
 
 		Expense expense = expenseEntry.getExpense();
 
+		Preconditions.checkNotNull(expense.getDateOfExpense());
 		Preconditions.checkNotNull(expense);
 		Preconditions.checkNotNull(expense.getCurrency());
 		Preconditions.checkArgument(!StringUtils.isEmpty(expense.getDescription()));
@@ -65,37 +67,44 @@ public class ExpenseEntryDAOImpl implements ExpenseEntryDAO {
 
 		checkIfExpenseEntryIsValidForStorage(expenseEntry);
 
-		if (exists(expenseEntry)) {
+		ExpenseCompositeKey expenseCompositeKey = expenseEntry.getExpenseCompositeKey();
+
+		if (exists(expenseEntry.getExpenseCompositeKey())) {
 			throw new EntityAlreadyExistsException(String.format("Expense entry with key '%s' for user '%s' " +
-					"already exists", expenseEntry.getUniqueKey(), expenseEntry.getUsername()));
+					"already exists", expenseCompositeKey.getUniqueKey(),
+					expenseCompositeKey.getUsername()));
 		}
 
-		redisHashOperations.put(getFullNameForRedisCollectionForExpenses(expenseEntry.getUsername()), expenseEntry.getUniqueKey(), expenseEntry);
+		redisHashOperations.put(getFullNameForRedisCollectionForExpenses(expenseCompositeKey.getUsername()), expenseCompositeKey.getUniqueKey(), expenseEntry);
 	}
 
 	@Override
-	public boolean exists(ExpenseEntry expenseEntry) {
+	public boolean exists(ExpenseCompositeKey expenseCompositeKey) {
 
-		checkExpenseUsernameAndKeyNotEmpty(expenseEntry.getUsername(), expenseEntry.getUniqueKey());
-		return redisHashOperations.hasKey(getFullNameForRedisCollectionForExpenses(expenseEntry.getUsername()), expenseEntry.getUniqueKey());
+		checkExpenseCompositeKey(expenseCompositeKey);
+		return redisHashOperations.hasKey(getFullNameForRedisCollectionForExpenses(expenseCompositeKey.getUsername()),
+				expenseCompositeKey.getUniqueKey());
 	}
 
 	@Override
-	public void delete(ExpenseEntry expenseEntry) {
+	public void delete(ExpenseCompositeKey expenseCompositeKey) {
 
-		checkExpenseUsernameAndKeyNotEmpty(expenseEntry.getUsername(), expenseEntry.getUniqueKey());
-		redisHashOperations.delete(getFullNameForRedisCollectionForExpenses(expenseEntry.getUsername()), expenseEntry.getUniqueKey());
+		checkExpenseCompositeKey(expenseCompositeKey);
+		redisHashOperations.delete(getFullNameForRedisCollectionForExpenses(expenseCompositeKey.getUsername()),
+				expenseCompositeKey.getUniqueKey());
 	}
 
 	@Override
 	public void update(ExpenseEntry expenseEntry) {
 
-		checkExpenseUsernameAndKeyNotEmpty(expenseEntry.getUsername(), expenseEntry.getUniqueKey());
-		if (!exists(expenseEntry)) {
+		ExpenseCompositeKey expenseCompositeKey = expenseEntry.getExpenseCompositeKey();
+
+		checkExpenseCompositeKey(expenseCompositeKey);
+		if (!exists(expenseCompositeKey)) {
 			throw new NoSuchEntityException("There is no expense entry with key '%s' for user '%s' in DB");
 		}
 
-		redisHashOperations.put(getFullNameForRedisCollectionForExpenses(expenseEntry.getUsername()),
-				expenseEntry.getUniqueKey(), expenseEntry);
+		redisHashOperations.put(getFullNameForRedisCollectionForExpenses(expenseCompositeKey.getUsername()),
+				expenseCompositeKey.getUniqueKey(), expenseEntry);
 	}
 }

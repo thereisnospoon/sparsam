@@ -1,7 +1,10 @@
 package me.thereisnospoon.sparsam.services.search.indexing;
 
+import me.thereisnospoon.sparsam.vo.ExpenseCompositeKey;
 import me.thereisnospoon.sparsam.vo.ExpenseEntry;
 import org.apache.lucene.document.*;
+
+import java.time.*;
 
 public enum ExpenseEntryFieldsForIndexing {
 
@@ -9,7 +12,9 @@ public enum ExpenseEntryFieldsForIndexing {
 
 		@Override
 		public Field getField(ExpenseEntry expenseEntry) {
-			return new StringField(this.fieldNameInIndex, expenseEntry.getUsername(), Field.Store.NO);
+
+			ExpenseCompositeKey expenseCompositeKey = expenseEntry.getExpenseCompositeKey();
+			return new StringField(this.fieldNameInIndex, expenseCompositeKey.getUsername(), Field.Store.NO);
 		}
 	},
 
@@ -17,15 +22,28 @@ public enum ExpenseEntryFieldsForIndexing {
 
 		@Override
 		public Field getField(ExpenseEntry expenseEntry) {
-			return new StringField(this.fieldNameInIndex, expenseEntry.getUniqueKey(), Field.Store.NO);
+
+			ExpenseCompositeKey expenseCompositeKey = expenseEntry.getExpenseCompositeKey();
+			return new StringField(this.fieldNameInIndex, expenseCompositeKey.getUniqueKey(), Field.Store.NO);
 		}
 	},
 
 	DATE_OF_EXPENSE("dateOfExpense") {
 
+		private Long getDateOfExpenseInMilliseconds(ExpenseEntry expenseEntry) {
+
+			LocalDate dateOfExpense = expenseEntry.getExpense().getDateOfExpense();
+			ZonedDateTime dateOfExpenseAsZonedDT = ZonedDateTime.of(dateOfExpense, LocalTime.now(),
+					ZoneId.systemDefault());
+
+			return dateOfExpenseAsZonedDT.toInstant().toEpochMilli();
+		}
+
 		@Override
 		public Field getField(ExpenseEntry expenseEntry) {
-			return new LongField(this.fieldNameInIndex, expenseEntry.getDateOfExpense().toEpochMilli(), Field.Store.NO);
+
+			Long dateOfExpense = getDateOfExpenseInMilliseconds(expenseEntry);
+			return new LongField(this.fieldNameInIndex, dateOfExpense, Field.Store.NO);
 		}
 	},
 

@@ -4,6 +4,7 @@ import me.thereisnospoon.sparsam.dao.ExpenseEntryDAO;
 import me.thereisnospoon.sparsam.dao.UserDAO;
 import me.thereisnospoon.sparsam.services.entities.UserService;
 import me.thereisnospoon.sparsam.vo.Expense;
+import me.thereisnospoon.sparsam.vo.ExpenseCompositeKey;
 import me.thereisnospoon.sparsam.vo.ExpenseEntry;
 import me.thereisnospoon.sparsam.vo.User;
 import org.junit.After;
@@ -15,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.time.LocalDate;
 import java.util.Currency;
 
 import static org.junit.Assert.*;
@@ -70,7 +72,8 @@ public class UserServiceTest {
 	}
 
 	private void deleteUsersExpenseEntries(String username) {
-		expenseEntryDAO.getExpensesForUser(username).stream().forEach(expenseEntryDAO::delete);
+		expenseEntryDAO.getExpensesForUser(username).stream()
+				.forEach(expenseEntry -> expenseEntryDAO.delete(expenseEntry.getExpenseCompositeKey()));
 	}
 
 	@Test
@@ -87,6 +90,7 @@ public class UserServiceTest {
 		expense.setAmount(TEST_AMOUNT);
 		expense.setCurrency(Currency.getInstance("USD"));
 		expense.setDescription("description");
+		expense.setDateOfExpense(LocalDate.now());
 		return expense;
 	}
 
@@ -97,7 +101,7 @@ public class UserServiceTest {
 		ExpenseEntry expenseEntry = userService.addExpenseEntryForUser(expense, TEST_USERNAME);
 
 		ExpenseEntry expenseEntryFromDB = expenseEntryDAO
-				.getExpenseEntryByUsernameAndKey(TEST_USERNAME, expenseEntry.getUniqueKey());
+				.getExpenseEntryByCompositeKey(expenseEntry.getExpenseCompositeKey());
 
 		assertEquals(TEST_AMOUNT, expenseEntryFromDB.getExpense().getAmount());
 	}
@@ -111,10 +115,12 @@ public class UserServiceTest {
 		Expense updatedExpense = createTestExpense();
 		updatedExpense.setAmount(TEST_UPDATED_AMOUNT);
 
-		userService.updateExpenseEntryForUser(TEST_USERNAME, expenseEntry.getUniqueKey(), updatedExpense);
+		ExpenseCompositeKey expenseCompositeKey = expenseEntry.getExpenseCompositeKey();
+
+		userService.updateExpenseEntryForUser(expenseCompositeKey, updatedExpense);
 
 		ExpenseEntry expenseEntryFromDB = expenseEntryDAO
-				.getExpenseEntryByUsernameAndKey(TEST_USERNAME, expenseEntry.getUniqueKey());
+				.getExpenseEntryByCompositeKey(expenseCompositeKey);
 
 		assertEquals(TEST_UPDATED_AMOUNT, expenseEntryFromDB.getExpense().getAmount());
 	}

@@ -2,6 +2,7 @@ package me.thereisnospoon.sparsam.dao;
 
 import me.thereisnospoon.sparsam.exceptions.dao.EntityAlreadyExistsException;
 import me.thereisnospoon.sparsam.vo.Expense;
+import me.thereisnospoon.sparsam.vo.ExpenseCompositeKey;
 import me.thereisnospoon.sparsam.vo.ExpenseEntry;
 import org.junit.After;
 import org.junit.Before;
@@ -12,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Currency;
 import java.util.List;
 import java.util.UUID;
@@ -40,18 +41,18 @@ public class ExpenseEntryDAOTest {
 	private ExpenseEntry createTestExpenseEntry() {
 
 		ExpenseEntry expenseEntry = new ExpenseEntry();
-		expenseEntry.setUsername(TEST_USERNAME);
+		ExpenseCompositeKey expenseCompositeKey = new ExpenseCompositeKey();
+		expenseCompositeKey.setUniqueKey(testExpenseEntryKey);
+		expenseCompositeKey.setUsername(TEST_USERNAME);
 
 		Expense expense = new Expense();
-
-		expenseEntry.setDateOfExpense(Instant.now());
-		expenseEntry.setUniqueKey(testExpenseEntryKey);
-
+		expense.setDateOfExpense(LocalDate.now());
 		expense.setAmount(TEST_EXPENSE_AMOUNT);
 		expense.setCurrency(Currency.getInstance("USD"));
 		expense.setDescription("some description");
 
 		expenseEntry.setExpense(expense);
+		expenseEntry.setExpenseCompositeKey(expenseCompositeKey);
 
 		return expenseEntry;
 	}
@@ -59,8 +60,8 @@ public class ExpenseEntryDAOTest {
 	private void deleteTestExpenseEntryIfExists() {
 
 		ExpenseEntry expenseEntry = createTestExpenseEntry();
-		if (expenseEntryDAO.exists(expenseEntry)) {
-			expenseEntryDAO.delete(expenseEntry);
+		if (expenseEntryDAO.exists(expenseEntry.getExpenseCompositeKey())) {
+			expenseEntryDAO.delete(expenseEntry.getExpenseCompositeKey());
 		}
 	}
 
@@ -81,9 +82,9 @@ public class ExpenseEntryDAOTest {
 		expenseEntryDAO.create(expenseEntry);
 
 		ExpenseEntry retrievedExpenseEntry = expenseEntryDAO
-				.getExpenseEntryByUsernameAndKey(expenseEntry.getUsername(), expenseEntry.getUniqueKey());
+				.getExpenseEntryByCompositeKey(expenseEntry.getExpenseCompositeKey());
 
-		assertEquals(testExpenseEntryKey, retrievedExpenseEntry.getUniqueKey());
+		assertEquals(testExpenseEntryKey, retrievedExpenseEntry.getExpenseCompositeKey().getUniqueKey());
 		assertEquals(TEST_EXPENSE_AMOUNT, retrievedExpenseEntry.getExpense().getAmount());
 	}
 
@@ -101,7 +102,7 @@ public class ExpenseEntryDAOTest {
 		ExpenseEntry expenseEntry1 = createTestExpenseEntry();
 		ExpenseEntry expenseEntry2 = createTestExpenseEntry();
 		String keyForSecondEntry = UUID.randomUUID().toString();
-		expenseEntry2.setUniqueKey(keyForSecondEntry);
+		expenseEntry2.getExpenseCompositeKey().setUniqueKey(keyForSecondEntry);
 
 		expenseEntryDAO.create(expenseEntry1);
 		expenseEntryDAO.create(expenseEntry2);
@@ -109,12 +110,12 @@ public class ExpenseEntryDAOTest {
 		List<ExpenseEntry> testUserExpenses = expenseEntryDAO.getExpensesForUser(TEST_USERNAME);
 		assertEquals(2, testUserExpenses.size());
 
-		expenseEntryDAO.delete(expenseEntry2);
+		expenseEntryDAO.delete(expenseEntry2.getExpenseCompositeKey());
 		List<ExpenseEntry> testUserExpensesAfterDeletionOfOne = expenseEntryDAO.getExpensesForUser(TEST_USERNAME);
 		assertEquals(1, testUserExpensesAfterDeletionOfOne.size());
 
-		expenseEntryDAO.delete(expenseEntry1);
-		expenseEntryDAO.delete(expenseEntry2);
+		expenseEntryDAO.delete(expenseEntry1.getExpenseCompositeKey());
+		expenseEntryDAO.delete(expenseEntry2.getExpenseCompositeKey());
 
 		List<ExpenseEntry> testUserExpensesAfterAllDeleted = expenseEntryDAO.getExpensesForUser(TEST_USERNAME);
 		assertEquals(0, testUserExpensesAfterAllDeleted.size());
@@ -126,8 +127,12 @@ public class ExpenseEntryDAOTest {
 		ExpenseEntry expenseEntry = createTestExpenseEntry();
 		expenseEntryDAO.create(expenseEntry);
 
+		ExpenseCompositeKey expenseCompositeKey = new ExpenseCompositeKey();
+		expenseCompositeKey.setUniqueKey(testExpenseEntryKey);
+		expenseCompositeKey.setUsername(TEST_USERNAME);
+
 		ExpenseEntry expenseEntryRetrievedFromDB = expenseEntryDAO
-				.getExpenseEntryByUsernameAndKey(TEST_USERNAME, testExpenseEntryKey);
+				.getExpenseEntryByCompositeKey(expenseCompositeKey);
 
 		assertEquals(TEST_EXPENSE_AMOUNT, expenseEntryRetrievedFromDB.getExpense().getAmount());
 
@@ -136,7 +141,7 @@ public class ExpenseEntryDAOTest {
 
 		expenseEntryDAO.update(expenseEntry);
 		ExpenseEntry expenseEntryRetrievedFromDBAfterUpdate = expenseEntryDAO
-				.getExpenseEntryByUsernameAndKey(TEST_USERNAME, testExpenseEntryKey);
+				.getExpenseEntryByCompositeKey(expenseCompositeKey);
 
 		assertEquals(TEST_UPDATED_EXPENSE_AMOUNT, expenseEntryRetrievedFromDBAfterUpdate.getExpense().getAmount());
 	}
