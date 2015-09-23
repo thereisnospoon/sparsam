@@ -47,7 +47,7 @@ public class ExpenseEntrySearcherImpl implements ExpenseEntrySearcher {
 		IndexSearcher indexSearcher = indexSearcherFactory.getIndexSearcher();
 
 		try {
-			TopDocs topDocs = indexSearcher.search(searchQuery, getResultsLimit(page), getReverseSortByDateOfExpense());
+			TopDocs topDocs = indexSearcher.search(searchQuery, getResultsLimit(page), page.getSort());
 			List<ExpenseCompositeKey> foundExpenses = processSearchResult(username, topDocs, indexSearcher);
 			List<ExpenseCompositeKey> expensesOnRequestedPage = filterOutExpensesFromAnotherPage(foundExpenses, page);
 
@@ -56,14 +56,6 @@ public class ExpenseEntrySearcherImpl implements ExpenseEntrySearcher {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-	}
-
-	private Sort getReverseSortByDateOfExpense() {
-
-		SortField reverseDateSortField = new SortField(ExpenseEntryFieldsForIndexing.DATE_OF_EXPENSE.getFieldNameInIndex(),
-				SortField.Type.LONG, true);
-
-		return new Sort(reverseDateSortField);
 	}
 
 	private List<ExpenseCompositeKey> processSearchResult(String username, TopDocs topDocs, IndexSearcher indexSearcher) {
