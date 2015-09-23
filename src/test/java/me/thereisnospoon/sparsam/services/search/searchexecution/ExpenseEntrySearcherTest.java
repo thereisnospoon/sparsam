@@ -1,6 +1,5 @@
 package me.thereisnospoon.sparsam.services.search.searchexecution;
 
-import me.thereisnospoon.sparsam.services.search.indexing.ExpenseEntryFieldsForIndexing;
 import me.thereisnospoon.sparsam.services.search.indexing.ExpenseEntryIndexer;
 import me.thereisnospoon.sparsam.services.search.searchexecution.facets.DateRangeFacet;
 import me.thereisnospoon.sparsam.vo.Expense;
