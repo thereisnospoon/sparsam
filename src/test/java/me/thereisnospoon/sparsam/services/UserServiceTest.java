@@ -117,7 +117,7 @@ public class UserServiceTest {
 
 		ExpenseCompositeKey expenseCompositeKey = expenseEntry.getExpenseCompositeKey();
 
-		userService.updateExpenseEntryForUser(expenseCompositeKey, updatedExpense);
+		userService.updateExpenseEntry(expenseCompositeKey, updatedExpense);
 
 		ExpenseEntry expenseEntryFromDB = expenseEntryDAO
 				.getExpenseEntryByCompositeKey(expenseCompositeKey);

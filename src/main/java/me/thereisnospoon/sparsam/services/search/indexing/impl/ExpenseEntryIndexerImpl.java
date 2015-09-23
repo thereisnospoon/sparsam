@@ -8,8 +8,8 @@ import org.apache.lucene.index.IndexWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Arrays;
-
 @Service
 public class ExpenseEntryIndexerImpl implements ExpenseEntryIndexer {
 
@@ -22,6 +22,12 @@ public class ExpenseEntryIndexerImpl implements ExpenseEntryIndexer {
 		Document document = new Document();
 		Arrays.asList(ExpenseEntryFieldsForIndexing.values()).forEach(expenseEntryFieldsForIndexing ->
 				document.add(expenseEntryFieldsForIndexing.getLuceneField(expenseEntry)));
+
+		try {
+			indexWriter.addDocument(document);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override

@@ -13,5 +13,7 @@ public interface UserService {
 
 	ExpenseEntry addExpenseEntryForUser(Expense expense, String username);
 
-	void updateExpenseEntryForUser(ExpenseCompositeKey expenseCompositeKey, Expense updatedExpense);
+	void updateExpenseEntry(ExpenseCompositeKey expenseCompositeKey, Expense updatedExpense);
+
+	void deleteExpenseEntry(ExpenseCompositeKey expenseCompositeKey);
 }

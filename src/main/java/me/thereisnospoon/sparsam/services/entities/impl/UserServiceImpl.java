@@ -3,6 +3,7 @@ package me.thereisnospoon.sparsam.services.entities.impl;
 import me.thereisnospoon.sparsam.dao.ExpenseEntryDAO;
 import me.thereisnospoon.sparsam.dao.UserDAO;
 import me.thereisnospoon.sparsam.services.entities.UserService;
+import me.thereisnospoon.sparsam.services.search.indexing.ExpenseEntryIndexer;
 import me.thereisnospoon.sparsam.vo.Expense;
 import me.thereisnospoon.sparsam.vo.ExpenseCompositeKey;
 import me.thereisnospoon.sparsam.vo.ExpenseEntry;
@@ -25,6 +26,9 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
+	@Autowired
+	private ExpenseEntryIndexer expenseEntryIndexer;
+
 	@Override
 	public void createUser(User user) {
 
@@ -40,6 +44,13 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public ExpenseEntry addExpenseEntryForUser(Expense expense, String username) {
+
+		ExpenseEntry expenseEntry = createNewExpenseEntryInDB(expense, username);
+		expenseEntryIndexer.addExpenseEntryToIndex(expenseEntry);
+		return expenseEntry;
+	}
+
+	private ExpenseEntry createNewExpenseEntryInDB(Expense expense, String username) {
 
 		ExpenseEntry expenseEntry = new ExpenseEntry();
 
@@ -59,12 +70,17 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public void updateExpenseEntryForUser(ExpenseCompositeKey expenseCompositeKey, Expense updatedExpense) {
+	public void updateExpenseEntry(ExpenseCompositeKey expenseCompositeKey, Expense updatedExpense) {
 
 		ExpenseEntry expenseEntry = new ExpenseEntry();
 		expenseEntry.setExpenseCompositeKey(expenseCompositeKey);
 		expenseEntry.setExpense(updatedExpense);
 
 		expenseEntryDAO.update(expenseEntry);
+	}
+
+	@Override
+	public void deleteExpenseEntry(ExpenseCompositeKey expenseCompositeKey) {
+		expenseEntryDAO.delete(expenseCompositeKey);
 	}
 }

@@ -74,10 +74,4 @@
 		<constructor-arg ref="inMemoryDirectory"/>
 		<constructor-arg ref="indexWriterConfig"/>
 	</bean>
-
-	<bean id="indexReader" factory-bean="indexWriter" factory-method="getReader"/>
-
-	<bean id="indexSearcher" class="org.apache.lucene.search.IndexSearcher">
-		<constructor-arg ref="indexReader"/>
-	</bean>
 </beans>
