@@ -72,11 +72,19 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void updateExpenseEntry(ExpenseCompositeKey expenseCompositeKey, Expense updatedExpense) {
 
+		ExpenseEntry updatedExpenseEntry = updateExpenseEntryInDB(expenseCompositeKey, updatedExpense);
+		expenseEntryIndexer.updateIndexedExpenseEntry(updatedExpenseEntry);
+	}
+
+	private ExpenseEntry updateExpenseEntryInDB(ExpenseCompositeKey expenseCompositeKey, Expense updatedExpense) {
+
 		ExpenseEntry expenseEntry = new ExpenseEntry();
 		expenseEntry.setExpenseCompositeKey(expenseCompositeKey);
 		expenseEntry.setExpense(updatedExpense);
 
 		expenseEntryDAO.update(expenseEntry);
+
+		return expenseEntry;
 	}
 
 	@Override
