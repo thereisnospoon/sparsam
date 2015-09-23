@@ -44,7 +44,7 @@ public class IndexSearcherFactoryImpl implements IndexSearcherFactory {
 
 		try {
 			DirectoryReader newIndexReader = DirectoryReader.openIfChanged(currentIndexReader, indexWriter, true);
-			if (newIndexReader != currentIndexReader) {
+			if (newIndexReader != currentIndexReader && null != newIndexReader) {
 
 				currentIndexReader = newIndexReader;
 				currentIndexSearcher = new IndexSearcher(newIndexReader);

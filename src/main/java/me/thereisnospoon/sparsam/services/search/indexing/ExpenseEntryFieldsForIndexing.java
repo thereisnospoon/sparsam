@@ -40,7 +40,7 @@ public enum ExpenseEntryFieldsForIndexing {
 		public Field getLuceneField(ExpenseEntry expenseEntry) {
 
 			Long dateOfExpense = getDateOfExpenseInMilliseconds(expenseEntry);
-			return new LongField(getFieldNameInIndex(), dateOfExpense, Field.Store.NO);
+			return new NumericDocValuesField(getFieldNameInIndex(), dateOfExpense);
 		}
 	},
 
@@ -79,7 +79,7 @@ public enum ExpenseEntryFieldsForIndexing {
 		ZonedDateTime zonedDateTime = ZonedDateTime.of(localDate, LocalTime.MIN,
 				ZoneId.systemDefault());
 
-		return zonedDateTime.toInstant().toEpochMilli();
+		return zonedDateTime.toInstant().getEpochSecond();
 	}
 
 	public abstract Field getLuceneField(ExpenseEntry expenseEntry);

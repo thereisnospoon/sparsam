@@ -2,6 +2,7 @@ package me.thereisnospoon.sparsam.services.search.searchexecution.facets;
 
 import com.google.common.base.Preconditions;
 import me.thereisnospoon.sparsam.services.search.indexing.ExpenseEntryFieldsForIndexing;
+import org.apache.lucene.search.DocValuesRangeQuery;
 import org.apache.lucene.search.NumericRangeQuery;
 import org.apache.lucene.search.Query;
 
@@ -40,6 +41,15 @@ public class DateRangeFacet implements Facet {
 			if (dateRangeFacet.startDate == null && dateRangeFacet.endDate == null) {
 				throw new IllegalStateException("At least one bound of DateRangeFacet should be specified");
 			}
+
+			if (dateRangeFacet.startDate == null) {
+				dateRangeFacet.startDate = LocalDate.MIN;
+			}
+
+			if (dateRangeFacet.endDate == null) {
+				dateRangeFacet.endDate = LocalDate.MAX;
+			}
+
 			return dateRangeFacet;
 		}
 	}
@@ -47,8 +57,8 @@ public class DateRangeFacet implements Facet {
 	@Override
 	public Query buildQuery() {
 
-		return NumericRangeQuery.newLongRange(ExpenseEntryFieldsForIndexing.DESCRIPTION.getFieldNameInIndex(),
-						getLocalDateAsLong(startDate), getLocalDateAsLong(endDate),
-						true, true);
+		return DocValuesRangeQuery.newLongRange(ExpenseEntryFieldsForIndexing.DATE_OF_EXPENSE.getFieldNameInIndex(),
+				getLocalDateAsLong(startDate), getLocalDateAsLong(endDate),
+				true, true);
 	}
 }
