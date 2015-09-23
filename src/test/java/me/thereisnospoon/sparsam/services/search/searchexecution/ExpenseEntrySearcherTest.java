@@ -5,6 +5,7 @@ import me.thereisnospoon.sparsam.services.search.searchexecution.facets.DateRang
 import me.thereisnospoon.sparsam.vo.Expense;
 import me.thereisnospoon.sparsam.vo.ExpenseCompositeKey;
 import me.thereisnospoon.sparsam.vo.ExpenseEntry;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,12 +33,12 @@ public class ExpenseEntrySearcherTest {
 	private ExpenseEntryIndexer expenseEntryIndexer;
 
 	private List<String> entriesKeysOrderedByDate;
+	List<ExpenseEntry> testExpenseEntries = new LinkedList<>();
 
 	@Before
 	public void setUp() {
 
-		List<ExpenseEntry> testExpenseEntries = new LinkedList<>();
-
+		testExpenseEntries = new LinkedList<>();
 		testExpenseEntries.add(createExpenseEntry(TEST_USER1, LocalDate.now().plusDays(1), 10.));
 		testExpenseEntries.add(createExpenseEntry(TEST_USER1, LocalDate.now(), 10.));
 		testExpenseEntries.add(createExpenseEntry(TEST_USER1, LocalDate.now().minusDays(1), 10.));
@@ -48,6 +49,12 @@ public class ExpenseEntrySearcherTest {
 				.collect(Collectors.toList());
 
 		testExpenseEntries.stream().forEach(expenseEntryIndexer::addExpenseEntryToIndex);
+	}
+
+	@After
+	public void cleanUp() {
+		testExpenseEntries.stream()
+				.forEach(e -> expenseEntryIndexer.deleteExpenseEntryFromIndex(e.getExpenseCompositeKey()));
 	}
 
 	private ExpenseEntry createExpenseEntry(String username, LocalDate dateOfExpense, Double amount) {
