@@ -1,10 +1,9 @@
-package me.thereisnospoon.sparsam.services.search;
+package me.thereisnospoon.sparsam.services.search.searchexecution;
 
-import me.thereisnospoon.sparsam.services.search.facets.Facet;
+import me.thereisnospoon.sparsam.services.search.searchexecution.facets.Facet;
 import me.thereisnospoon.sparsam.vo.ExpenseCompositeKey;
 
 import java.util.Collection;
-import java.util.List;
 
 public interface ExpenseEntrySearcher {
 
@@ -27,5 +26,5 @@ public interface ExpenseEntrySearcher {
 		}
 	}
 
-	List<ExpenseCompositeKey> search(Collection<Facet> facets, Page page);
+	SearchResult<ExpenseCompositeKey> search(String username, Collection<Facet> facets, Page page);
 }

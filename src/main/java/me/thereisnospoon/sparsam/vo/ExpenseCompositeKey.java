@@ -5,6 +5,13 @@ public class ExpenseCompositeKey {
 	private String uniqueKey;
 	private String username;
 
+	public ExpenseCompositeKey() {}
+
+	public ExpenseCompositeKey(String uniqueKey, String username) {
+		this.uniqueKey = uniqueKey;
+		this.username = username;
+	}
+
 	public String getUniqueKey() {
 		return uniqueKey;
 	}

@@ -1,4 +1,4 @@
-package me.thereisnospoon.sparsam.services.search.facets;
+package me.thereisnospoon.sparsam.services.search.searchexecution.facets;
 
 import com.google.common.base.Preconditions;
 import me.thereisnospoon.sparsam.services.search.indexing.ExpenseEntryFieldsForIndexing;
