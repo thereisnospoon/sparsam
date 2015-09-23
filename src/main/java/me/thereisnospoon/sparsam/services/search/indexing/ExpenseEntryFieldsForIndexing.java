@@ -48,7 +48,7 @@ public enum ExpenseEntryFieldsForIndexing {
 
 		@Override
 		public Field getLuceneField(ExpenseEntry expenseEntry) {
-			return new DoubleField(getFieldNameInIndex(), expenseEntry.getExpense().getAmount(), Field.Store.NO);
+			return new DoubleDocValuesField(getFieldNameInIndex(), expenseEntry.getExpense().getAmount());
 		}
 	},
 
