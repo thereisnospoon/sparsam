@@ -24,7 +24,7 @@ public enum ExpenseEntryFieldsForIndexing {
 		public Field getLuceneField(ExpenseEntry expenseEntry) {
 
 			ExpenseCompositeKey expenseCompositeKey = expenseEntry.getExpenseCompositeKey();
-			return new StringField(getFieldNameInIndex(), expenseCompositeKey.getUniqueKey(), Field.Store.NO);
+			return new StringField(getFieldNameInIndex(), expenseCompositeKey.getUniqueKey(), Field.Store.YES);
 		}
 	},
 
@@ -33,10 +33,7 @@ public enum ExpenseEntryFieldsForIndexing {
 		private Long getDateOfExpenseInMilliseconds(ExpenseEntry expenseEntry) {
 
 			LocalDate dateOfExpense = expenseEntry.getExpense().getDateOfExpense();
-			ZonedDateTime dateOfExpenseAsZonedDT = ZonedDateTime.of(dateOfExpense, LocalTime.now(),
-					ZoneId.systemDefault());
-
-			return dateOfExpenseAsZonedDT.toInstant().toEpochMilli();
+			return getLocalDateAsLong(dateOfExpense);
 		}
 
 		@Override
@@ -75,6 +72,14 @@ public enum ExpenseEntryFieldsForIndexing {
 	ExpenseEntryFieldsForIndexing(String fieldNameInIndex) {
 
 		this.fieldNameInIndex = fieldNameInIndex;
+	}
+
+	public static Long getLocalDateAsLong(LocalDate localDate) {
+
+		ZonedDateTime zonedDateTime = ZonedDateTime.of(localDate, LocalTime.MIN,
+				ZoneId.systemDefault());
+
+		return zonedDateTime.toInstant().toEpochMilli();
 	}
 
 	public abstract Field getLuceneField(ExpenseEntry expenseEntry);
