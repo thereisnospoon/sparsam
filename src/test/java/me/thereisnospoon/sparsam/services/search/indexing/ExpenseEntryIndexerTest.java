@@ -13,6 +13,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.time.LocalDate;
 import java.util.Currency;
+import java.util.UUID;
 
 import static org.junit.Assert.*;
 
@@ -24,10 +25,9 @@ public class ExpenseEntryIndexerTest {
 	private static final String TEST_USERNAME2 = "testUsername5";
 	private static final String TEST_USERNAME3 = "testUsername6";
 	private static final String TEST_USERNAME4 = "testUsername7";
+	private static final String TEST_USERNAME5 = "testUsername8";
 	private static final Double AMOUNT = 10.;
 	private static final Double AMOUNT2 = 20.;
-	private static final String UNIQUE_KEY1 = "1";
-	private static final String UNIQUE_KEY2 = "2";
 
 	@Autowired
 	private ExpenseEntryIndexer expenseEntryIndexer;
@@ -57,10 +57,10 @@ public class ExpenseEntryIndexerTest {
 	@Test
 	public void testAddExpenseEntryToIndex() throws Exception {
 
-		ExpenseEntry expenseEntry = createExpenseEntry(TEST_USERNAME, UNIQUE_KEY1, LocalDate.now(), AMOUNT,
+		ExpenseEntry expenseEntry = createExpenseEntry(TEST_USERNAME, UUID.randomUUID().toString(), LocalDate.now(), AMOUNT,
 				"description for user");
 
-		ExpenseEntry expenseEntry2 = createExpenseEntry(TEST_USERNAME2, UNIQUE_KEY1, LocalDate.now().plusDays(2), AMOUNT2,
+		ExpenseEntry expenseEntry2 = createExpenseEntry(TEST_USERNAME2, UUID.randomUUID().toString(), LocalDate.now().plusDays(2), AMOUNT2,
 				"text to analyzer");
 
 		expenseEntryIndexer.addExpenseEntryToIndex(expenseEntry);
@@ -88,8 +88,8 @@ public class ExpenseEntryIndexerTest {
 	public void testUpdateExpenseEntryInIndex() throws Exception {
 
 
-		ExpenseEntry expenseEntryToUpdate = createExpenseEntry(TEST_USERNAME3, UNIQUE_KEY2, LocalDate.now(), AMOUNT2,
-				"new descriptions");
+		ExpenseEntry expenseEntryToUpdate = createExpenseEntry(TEST_USERNAME3, UUID.randomUUID().toString(), LocalDate.now(),
+				AMOUNT2, "new descriptions");
 
 		expenseEntryIndexer.addExpenseEntryToIndex(expenseEntryToUpdate);
 		IndexSearcher indexSearcher = indexSearcherFactory.getIndexSearcher();
@@ -103,5 +103,23 @@ public class ExpenseEntryIndexerTest {
 		indexSearcher = indexSearcherFactory.getIndexSearcher();
 		Term termForUser4Entries = new Term(ExpenseEntryFieldsForIndexing.USERNAME.getFieldNameInIndex(), TEST_USERNAME4);
 		assertEquals(1, indexSearcher.search(new TermQuery(termForUser4Entries), 10).totalHits);
+	}
+
+	@Test
+	public void testDeleteExpenseEntryFromIndex() throws Exception {
+
+		String uniqueKey = UUID.randomUUID().toString();
+		ExpenseEntry expenseEntry = createExpenseEntry(TEST_USERNAME5, uniqueKey, LocalDate.now(), AMOUNT, "123");
+		expenseEntryIndexer.addExpenseEntryToIndex(expenseEntry);
+
+		IndexSearcher indexSearcher = indexSearcherFactory.getIndexSearcher();
+		Term createdExpenseEntryTerm = new Term(ExpenseEntryFieldsForIndexing.UNIQUE_KEY.getFieldNameInIndex(), uniqueKey);
+
+		assertEquals(1, indexSearcher.search(new TermQuery(createdExpenseEntryTerm), 10).totalHits);
+
+		expenseEntryIndexer.deleteExpenseEntryFromIndex(expenseEntry.getExpenseCompositeKey());
+
+		indexSearcher = indexSearcherFactory.getIndexSearcher();
+		assertEquals(0, indexSearcher.search(new TermQuery(createdExpenseEntryTerm), 10).totalHits);
 	}
 }

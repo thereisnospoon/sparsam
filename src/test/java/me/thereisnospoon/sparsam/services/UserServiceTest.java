@@ -124,4 +124,18 @@ public class UserServiceTest {
 
 		assertEquals(TEST_UPDATED_AMOUNT, expenseEntryFromDB.getExpense().getAmount());
 	}
+
+	@Test
+	public void testDeleteExpenseEntryForUser() {
+
+		Expense expense = createTestExpense();
+		ExpenseEntry expenseEntry = userService.addExpenseEntryForUser(expense, TEST_USERNAME);
+		ExpenseCompositeKey expenseCompositeKey = expenseEntry.getExpenseCompositeKey();
+		userService.deleteExpenseEntry(expenseCompositeKey);
+
+		expenseEntryDAO.getExpensesForUser(TEST_USERNAME)
+				.forEach(expenseEntryForUser ->
+						assertNotEquals(expenseCompositeKey.getUniqueKey(),
+								expenseEntryForUser.getExpenseCompositeKey().getUniqueKey()));
+	}
 }

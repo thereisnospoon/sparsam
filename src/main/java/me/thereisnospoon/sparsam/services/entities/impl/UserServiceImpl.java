@@ -89,6 +89,8 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void deleteExpenseEntry(ExpenseCompositeKey expenseCompositeKey) {
+
 		expenseEntryDAO.delete(expenseCompositeKey);
+		expenseEntryIndexer.deleteExpenseEntryFromIndex(expenseCompositeKey);
 	}
 }
