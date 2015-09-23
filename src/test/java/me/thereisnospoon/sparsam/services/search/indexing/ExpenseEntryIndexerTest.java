@@ -1,5 +1,6 @@
 package me.thereisnospoon.sparsam.services.search.indexing;
 
+import me.thereisnospoon.sparsam.services.search.searchexecution.IndexSearcherFactory;
 import me.thereisnospoon.sparsam.vo.Expense;
 import me.thereisnospoon.sparsam.vo.ExpenseCompositeKey;
 import me.thereisnospoon.sparsam.vo.ExpenseEntry;

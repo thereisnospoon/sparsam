@@ -1,6 +1,6 @@
-package me.thereisnospoon.sparsam.services.search.indexing.impl;
+package me.thereisnospoon.sparsam.services.search.searchexecution.impl;
 
-import me.thereisnospoon.sparsam.services.search.indexing.IndexSearcherFactory;
+import me.thereisnospoon.sparsam.services.search.searchexecution.IndexSearcherFactory;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.search.IndexSearcher;

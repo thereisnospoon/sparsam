@@ -5,7 +5,7 @@ import me.thereisnospoon.sparsam.services.search.searchexecution.ExpenseEntrySea
 import me.thereisnospoon.sparsam.services.search.searchexecution.SearchResult;
 import me.thereisnospoon.sparsam.services.search.searchexecution.facets.Facet;
 import me.thereisnospoon.sparsam.services.search.indexing.ExpenseEntryFieldsForIndexing;
-import me.thereisnospoon.sparsam.services.search.indexing.IndexSearcherFactory;
+import me.thereisnospoon.sparsam.services.search.searchexecution.IndexSearcherFactory;
 import me.thereisnospoon.sparsam.vo.ExpenseCompositeKey;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.*;

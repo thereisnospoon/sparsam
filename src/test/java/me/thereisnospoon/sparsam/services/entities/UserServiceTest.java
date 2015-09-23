@@ -1,4 +1,4 @@
-package me.thereisnospoon.sparsam.services;
+package me.thereisnospoon.sparsam.services.entities;
 
 import me.thereisnospoon.sparsam.dao.ExpenseEntryDAO;
 import me.thereisnospoon.sparsam.dao.UserDAO;

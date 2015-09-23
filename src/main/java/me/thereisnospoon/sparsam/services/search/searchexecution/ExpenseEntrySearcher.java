@@ -1,8 +1,10 @@
 package me.thereisnospoon.sparsam.services.search.searchexecution;
 
+import me.thereisnospoon.sparsam.services.search.indexing.ExpenseEntryFieldsForIndexing;
 import me.thereisnospoon.sparsam.services.search.searchexecution.facets.Facet;
 import me.thereisnospoon.sparsam.vo.ExpenseCompositeKey;
 import org.apache.lucene.search.Sort;
+import org.apache.lucene.search.SortField;
 
 import java.util.Collection;
 
@@ -34,4 +36,10 @@ public interface ExpenseEntrySearcher {
 	}
 
 	SearchResult<ExpenseCompositeKey> search(String username, Collection<Facet> facets, Page page);
+
+	static Sort getSortByDateOfExpense() {
+
+		String dateOfExpenseFieldNameInIndex = ExpenseEntryFieldsForIndexing.DATE_OF_EXPENSE.getFieldNameInIndex();
+		return new Sort(new SortField(dateOfExpenseFieldNameInIndex, SortField.Type.LONG, true));
+	}
 }
