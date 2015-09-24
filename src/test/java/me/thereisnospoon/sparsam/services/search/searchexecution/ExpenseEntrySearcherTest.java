@@ -26,6 +26,10 @@ public class ExpenseEntrySearcherTest {
 	private static final String TEST_USER1 = "userForExpenseEntrySearcherTest1";
 	private static final String TEST_USER2 = "userForExpenseEntrySearcherTest2";
 
+	private static final Double SMALLEST_AMOUNT = 10.;
+	private static final Double MIDDLE_AMMOUNT = 20.;
+	private static final Double BIGGEST_AMOUNT = 30.;
+
 	@Autowired
 	private ExpenseEntrySearcher expenseEntrySearcher;
 
@@ -39,10 +43,10 @@ public class ExpenseEntrySearcherTest {
 	public void setUp() {
 
 		testExpenseEntries = new LinkedList<>();
-		testExpenseEntries.add(createExpenseEntry(TEST_USER1, LocalDate.now().plusDays(1), 10.));
-		testExpenseEntries.add(createExpenseEntry(TEST_USER1, LocalDate.now(), 10.));
-		testExpenseEntries.add(createExpenseEntry(TEST_USER1, LocalDate.now().minusDays(1), 10.));
-		testExpenseEntries.add(createExpenseEntry(TEST_USER2, LocalDate.now(), 10.));
+		testExpenseEntries.add(createExpenseEntry(TEST_USER1, LocalDate.now().plusDays(1), SMALLEST_AMOUNT));
+		testExpenseEntries.add(createExpenseEntry(TEST_USER1, LocalDate.now(), MIDDLE_AMMOUNT));
+		testExpenseEntries.add(createExpenseEntry(TEST_USER1, LocalDate.now().minusDays(1), BIGGEST_AMOUNT));
+		testExpenseEntries.add(createExpenseEntry(TEST_USER2, LocalDate.now(), MIDDLE_AMMOUNT));
 
 		entriesKeysOrderedByDate = testExpenseEntries.stream()
 				.map(expenseEntry -> expenseEntry.getExpenseCompositeKey().getUniqueKey())
@@ -145,5 +149,11 @@ public class ExpenseEntrySearcherTest {
 
 	private Set<String> getFoundKeys(SearchResult<ExpenseCompositeKey> searchResult) {
 		return searchResult.getFoundRecords().stream().map(ExpenseCompositeKey::getUniqueKey).collect(Collectors.toSet());
+	}
+
+	@Test
+	public void testFindEntriesInAmountRange() {
+
+
 	}
 }
