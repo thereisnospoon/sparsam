@@ -2,9 +2,16 @@ package me.thereisnospoon.sparsam.services.search.indexing;
 
 import me.thereisnospoon.sparsam.vo.ExpenseCompositeKey;
 import me.thereisnospoon.sparsam.vo.ExpenseEntry;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.*;
 
 import java.time.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public enum ExpenseEntryFieldsForIndexing {
 
@@ -48,7 +55,7 @@ public enum ExpenseEntryFieldsForIndexing {
 
 		@Override
 		public Field getLuceneField(ExpenseEntry expenseEntry) {
-			return new DoubleDocValuesField(getFieldNameInIndex(), expenseEntry.getExpense().getAmount());
+			return new DoubleField(getFieldNameInIndex(), expenseEntry.getExpense().getAmount(), Field.Store.NO);
 		}
 	},
 
@@ -64,6 +71,11 @@ public enum ExpenseEntryFieldsForIndexing {
 		@Override
 		public Field getLuceneField(ExpenseEntry expenseEntry) {
 			return new TextField(getFieldNameInIndex(), expenseEntry.getExpense().getDescription(), Field.Store.NO);
+		}
+
+		@Override
+		public Analyzer getFieldAnalyzer() {
+			return new EnglishAnalyzer();
 		}
 	};
 
@@ -82,7 +94,19 @@ public enum ExpenseEntryFieldsForIndexing {
 		return zonedDateTime.toInstant().getEpochSecond();
 	}
 
+	public static Map<String,Analyzer> getPerFieldAnalyzers() {
+
+		List<ExpenseEntryFieldsForIndexing> fields = Arrays.asList(ExpenseEntryFieldsForIndexing.values());
+		return fields.stream()
+				.collect(Collectors.toMap(ExpenseEntryFieldsForIndexing::getFieldNameInIndex,
+						ExpenseEntryFieldsForIndexing::getFieldAnalyzer));
+	}
+
 	public abstract Field getLuceneField(ExpenseEntry expenseEntry);
+
+	public Analyzer getFieldAnalyzer() {
+		return new StandardAnalyzer();
+	}
 
 	public String getFieldNameInIndex() {
 		return this.fieldNameInIndex;

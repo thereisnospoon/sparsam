@@ -64,8 +64,16 @@
 	<!-- Indexing config-->
 	<bean id="defaultAnalyzer" class="org.apache.lucene.analysis.standard.StandardAnalyzer"/>
 
-	<bean id="indexWriterConfig" class="org.apache.lucene.index.IndexWriterConfig">
+	<bean id="fieldsToAnalyzersMap" class="me.thereisnospoon.sparsam.services.search.indexing.ExpenseEntryFieldsForIndexing"
+	      factory-method="getPerFieldAnalyzers"/>
+
+	<bean id="perFieldAnalyzerWrapper" class="org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper">
 		<constructor-arg ref="defaultAnalyzer"/>
+		<constructor-arg ref="fieldsToAnalyzersMap"/>
+	</bean>
+
+	<bean id="indexWriterConfig" class="org.apache.lucene.index.IndexWriterConfig">
+		<constructor-arg ref="perFieldAnalyzerWrapper"/>
 	</bean>
 
 	<bean id="inMemoryDirectory" class="org.apache.lucene.store.RAMDirectory"/>

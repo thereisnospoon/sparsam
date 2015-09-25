@@ -35,11 +35,13 @@ public interface ExpenseEntrySearcher {
 		}
 	}
 
-	SearchResult<ExpenseCompositeKey> search(String username, Collection<Facet> facets, Page page);
-
 	static Sort getSortByDateOfExpense() {
 
 		String dateOfExpenseFieldNameInIndex = ExpenseEntryFieldsForIndexing.DATE_OF_EXPENSE.getFieldNameInIndex();
 		return new Sort(new SortField(dateOfExpenseFieldNameInIndex, SortField.Type.LONG, true));
 	}
+
+	SearchResult<ExpenseCompositeKey> search(String username, Collection<Facet> facets, Page page);
+
+	SearchResult<ExpenseCompositeKey> searchByDescription(String username, String freeText);
 }

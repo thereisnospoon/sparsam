@@ -95,4 +95,11 @@ public class ExpenseEntrySearcherImpl implements ExpenseEntrySearcher {
 			return Collections.emptyList();
 		}
 	}
+
+	@Override
+	public SearchResult<ExpenseCompositeKey> searchByDescription(String username, String freeText) {
+
+		//TODO
+		return null;
+	}
 }

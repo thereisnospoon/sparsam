@@ -1,6 +1,7 @@
 package me.thereisnospoon.sparsam.services.search.searchexecution;
 
 import me.thereisnospoon.sparsam.services.search.indexing.ExpenseEntryIndexer;
+import me.thereisnospoon.sparsam.services.search.searchexecution.facets.AmountRangeFacet;
 import me.thereisnospoon.sparsam.services.search.searchexecution.facets.DateRangeFacet;
 import me.thereisnospoon.sparsam.vo.Expense;
 import me.thereisnospoon.sparsam.vo.ExpenseCompositeKey;
@@ -27,7 +28,7 @@ public class ExpenseEntrySearcherTest {
 	private static final String TEST_USER2 = "userForExpenseEntrySearcherTest2";
 
 	private static final Double SMALLEST_AMOUNT = 10.;
-	private static final Double MIDDLE_AMMOUNT = 20.;
+	private static final Double MIDDLE_AMOUNT = 20.;
 	private static final Double BIGGEST_AMOUNT = 30.;
 
 	@Autowired
@@ -44,9 +45,9 @@ public class ExpenseEntrySearcherTest {
 
 		testExpenseEntries = new LinkedList<>();
 		testExpenseEntries.add(createExpenseEntry(TEST_USER1, LocalDate.now().plusDays(1), SMALLEST_AMOUNT));
-		testExpenseEntries.add(createExpenseEntry(TEST_USER1, LocalDate.now(), MIDDLE_AMMOUNT));
+		testExpenseEntries.add(createExpenseEntry(TEST_USER1, LocalDate.now(), MIDDLE_AMOUNT));
 		testExpenseEntries.add(createExpenseEntry(TEST_USER1, LocalDate.now().minusDays(1), BIGGEST_AMOUNT));
-		testExpenseEntries.add(createExpenseEntry(TEST_USER2, LocalDate.now(), MIDDLE_AMMOUNT));
+		testExpenseEntries.add(createExpenseEntry(TEST_USER2, LocalDate.now(), MIDDLE_AMOUNT));
 
 		entriesKeysOrderedByDate = testExpenseEntries.stream()
 				.map(expenseEntry -> expenseEntry.getExpenseCompositeKey().getUniqueKey())
@@ -93,7 +94,7 @@ public class ExpenseEntrySearcherTest {
 	}
 
 	@Test
-	public void testSearchResultCheckSoringOrder() {
+	public void testSearchResultCheckSortingOrder() {
 
 		SearchResult<ExpenseCompositeKey> searchResult = expenseEntrySearcher.search(TEST_USER1, Collections.emptyList(),
 				new ExpenseEntrySearcher.Page(10, 1, ExpenseEntrySearcher.getSortByDateOfExpense()));
@@ -108,8 +109,12 @@ public class ExpenseEntrySearcherTest {
 		}
 	}
 
+	private Set<String> getFoundKeys(SearchResult<ExpenseCompositeKey> searchResult) {
+		return searchResult.getFoundRecords().stream().map(ExpenseCompositeKey::getUniqueKey).collect(Collectors.toSet());
+	}
+
 	@Test
-	public void testFindEntriesInDateRange() {
+	public void testFindEntriesStartingFromToday() {
 
 		DateRangeFacet dateRangeFacet = new DateRangeFacet.Builder().setStartDate(LocalDate.now()).build();
 
@@ -122,38 +127,69 @@ public class ExpenseEntrySearcherTest {
 
 		assertTrue(foundKeys.contains(entriesKeysOrderedByDate.get(0)));
 		assertTrue(foundKeys.contains(entriesKeysOrderedByDate.get(1)));
+	}
 
-		DateRangeFacet dateRangeFacet2 = new DateRangeFacet.Builder().setEndDate(LocalDate.now()).build();
+	@Test
+	public void testFindEntriesTillToday() {
 
-		searchResult = expenseEntrySearcher.search(TEST_USER1, Collections.singleton(dateRangeFacet2),
+		DateRangeFacet dateRangeFacet = new DateRangeFacet.Builder().setEndDate(LocalDate.now()).build();
+
+		SearchResult<ExpenseCompositeKey> searchResult = expenseEntrySearcher.search(TEST_USER1, Collections.singleton(dateRangeFacet),
 				new ExpenseEntrySearcher.Page(10, 1, ExpenseEntrySearcher.getSortByDateOfExpense()));
 
-		foundKeys = getFoundKeys(searchResult);
+		Set<String> foundKeys = getFoundKeys(searchResult);
 
 		assertTrue(foundKeys.contains(entriesKeysOrderedByDate.get(1)));
 		assertTrue(foundKeys.contains(entriesKeysOrderedByDate.get(2)));
+		assertEquals(2, foundKeys.size());
+	}
 
-		DateRangeFacet dateRangeFacet3 = new DateRangeFacet.Builder()
+	@Test
+	public void testFindEntriesForYesterdayAndToday() {
+
+		DateRangeFacet dateRangeFacet = new DateRangeFacet.Builder()
 				.setStartDate(LocalDate.now().minusDays(1))
 				.setEndDate(LocalDate.now())
 				.build();
 
-		searchResult = expenseEntrySearcher.search(TEST_USER1, Collections.singleton(dateRangeFacet3),
+		SearchResult<ExpenseCompositeKey> searchResult = expenseEntrySearcher.search(TEST_USER1, Collections.singleton(dateRangeFacet),
 				new ExpenseEntrySearcher.Page(10, 1, ExpenseEntrySearcher.getSortByDateOfExpense()));
 
-		foundKeys = getFoundKeys(searchResult);
+		Set<String> foundKeys = getFoundKeys(searchResult);
 
 		assertTrue(foundKeys.contains(entriesKeysOrderedByDate.get(2)));
 		assertTrue(foundKeys.contains(entriesKeysOrderedByDate.get(1)));
-	}
-
-	private Set<String> getFoundKeys(SearchResult<ExpenseCompositeKey> searchResult) {
-		return searchResult.getFoundRecords().stream().map(ExpenseCompositeKey::getUniqueKey).collect(Collectors.toSet());
+		assertEquals(2, foundKeys.size());
 	}
 
 	@Test
-	public void testFindEntriesInAmountRange() {
+	public void testFindEntriesWithAmountGreaterThanSmall() {
 
+		AmountRangeFacet amountRangeFacet = new AmountRangeFacet.Builder().setLowerAmountBound(MIDDLE_AMOUNT).build();
+		SearchResult<ExpenseCompositeKey> searchResult = expenseEntrySearcher.search(TEST_USER1, Collections.singleton(amountRangeFacet),
+				new ExpenseEntrySearcher.Page(10, 1, ExpenseEntrySearcher.getSortByDateOfExpense()));
 
+		Set<String> foundKeys = getFoundKeys(searchResult);
+
+		assertEquals(2, searchResult.getTotalHits().intValue());
+		assertTrue(foundKeys.contains(entriesKeysOrderedByDate.get(1)));
+		assertTrue(foundKeys.contains(entriesKeysOrderedByDate.get(2)));
+	}
+
+	@Test
+	public void testFindEntryForGivenLowerAndUpperBoundAmount() {
+
+		AmountRangeFacet amountRangeFacet = new AmountRangeFacet.Builder()
+				.setLowerAmountBound(15.)
+				.setUpperAmountBound(25.)
+				.build();
+
+		SearchResult<ExpenseCompositeKey> searchResult = expenseEntrySearcher.search(TEST_USER1, Collections.singleton(amountRangeFacet),
+				new ExpenseEntrySearcher.Page(10, 1, ExpenseEntrySearcher.getSortByDateOfExpense()));
+
+		Set<String> foundKeys = getFoundKeys(searchResult);
+
+		assertEquals(1, searchResult.getTotalHits().intValue());
+		assertTrue(foundKeys.contains(entriesKeysOrderedByDate.get(1)));
 	}
 }

@@ -12,28 +12,22 @@ public class AmountRangeFacet implements Facet {
 
 	private AmountRangeFacet() {}
 
-	public Double getLowerAmountBound() {
-		return lowerAmountBound;
-	}
-
-	public Double getUpperAmountBound() {
-		return upperAmountBound;
-	}
-
 	public static class Builder {
 
 		private AmountRangeFacet amountRangeFacet = new AmountRangeFacet();
 
-		public void setLowerAmountBound(Double lowerAmountBound) {
+		public Builder setLowerAmountBound(Double lowerAmountBound) {
 
 			Preconditions.checkNotNull(lowerAmountBound);
 			amountRangeFacet.lowerAmountBound = lowerAmountBound;
+			return this;
 		}
 
-		public void setUpperAmountBound(Double upperAmountBound) {
+		public Builder setUpperAmountBound(Double upperAmountBound) {
 
 			Preconditions.checkNotNull(upperAmountBound);
 			amountRangeFacet.upperAmountBound = upperAmountBound;
+			return this;
 		}
 
 		public AmountRangeFacet build() {
