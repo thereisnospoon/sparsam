@@ -97,7 +97,7 @@ public class ExpenseEntrySearcherImpl implements ExpenseEntrySearcher {
 	}
 
 	@Override
-	public SearchResult<ExpenseCompositeKey> searchByDescription(String username, String freeText) {
+	public SearchResult<ExpenseCompositeKey> searchByDescription(String username, String freeText, Page page) {
 
 		//TODO
 		return null;

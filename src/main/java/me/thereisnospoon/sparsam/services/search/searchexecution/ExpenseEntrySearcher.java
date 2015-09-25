@@ -43,5 +43,5 @@ public interface ExpenseEntrySearcher {
 
 	SearchResult<ExpenseCompositeKey> search(String username, Collection<Facet> facets, Page page);
 
-	SearchResult<ExpenseCompositeKey> searchByDescription(String username, String freeText);
+	SearchResult<ExpenseCompositeKey> searchByDescription(String username, String freeText, Page page);
 }
