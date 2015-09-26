@@ -4,20 +4,22 @@ import com.google.common.collect.Lists;
 import me.thereisnospoon.sparsam.services.search.searchexecution.ExpenseEntrySearcher;
 import me.thereisnospoon.sparsam.services.search.searchexecution.SearchResult;
 import me.thereisnospoon.sparsam.services.search.searchexecution.facets.Facet;
-import me.thereisnospoon.sparsam.services.search.indexing.ExpenseEntryFieldsForIndexing;
 import me.thereisnospoon.sparsam.services.search.searchexecution.IndexSearcherFactory;
 import me.thereisnospoon.sparsam.vo.ExpenseCompositeKey;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static me.thereisnospoon.sparsam.services.search.indexing.ExpenseEntryFieldsForIndexing.*;
 
 @Service
 public class ExpenseEntrySearcherImpl implements ExpenseEntrySearcher {
@@ -28,11 +30,11 @@ public class ExpenseEntrySearcherImpl implements ExpenseEntrySearcher {
 	@Override
 	public SearchResult<ExpenseCompositeKey> search(String username, Collection<Facet> facets, Page page) {
 
-		Query searchQuery = createSearchQuery(username, facets);
+		Query searchQuery = createSearchQueryFromFacets(username, facets);
 		return executeSearchAndProcessResults(username, searchQuery, page);
 	}
 
-	private Query createSearchQuery(String username, Collection<Facet> facets) {
+	private Query createSearchQueryFromFacets(String username, Collection<Facet> facets) {
 
 		BooleanQuery.Builder booleanQueryBuilder = new BooleanQuery.Builder();
 		facets.forEach(facet -> booleanQueryBuilder.add(facet.buildQuery(), BooleanClause.Occur.MUST));
@@ -70,7 +72,7 @@ public class ExpenseEntrySearcherImpl implements ExpenseEntrySearcher {
 	}
 
 	private Query queryExpenseEntriesForUser(String username) {
-		return new TermQuery(new Term(ExpenseEntryFieldsForIndexing.USERNAME.getFieldNameInIndex(), username));
+		return new TermQuery(new Term(USERNAME.getFieldNameInIndex(), username));
 	}
 
 	private Integer getResultsLimit(Page page) {
@@ -79,7 +81,7 @@ public class ExpenseEntrySearcherImpl implements ExpenseEntrySearcher {
 
 	private String getExpenseEntryKeyFromScoreDoc(IndexSearcher indexSearcher, ScoreDoc scoreDoc) {
 		try {
-			return indexSearcher.doc(scoreDoc.doc).get(ExpenseEntryFieldsForIndexing.UNIQUE_KEY.getFieldNameInIndex());
+			return indexSearcher.doc(scoreDoc.doc).get(UNIQUE_KEY.getFieldNameInIndex());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -99,7 +101,47 @@ public class ExpenseEntrySearcherImpl implements ExpenseEntrySearcher {
 	@Override
 	public SearchResult<ExpenseCompositeKey> searchByDescription(String username, String freeText, Page page) {
 
-		//TODO
-		return null;
+		List<String> searchTokens = safeTokenizeText(freeText);
+		Query query = buildQueryByDescriptionForUser(username, searchTokens);
+		return executeSearchAndProcessResults(username, query, page);
+	}
+
+	private List<String> safeTokenizeText(String text) {
+		try {
+			return tokenizeText(text);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private List<String> tokenizeText(String text) throws IOException {
+
+		Analyzer analyzer = new EnglishAnalyzer();
+		TokenStream tokenStream = analyzer.tokenStream(null, text);
+		CharTermAttribute charTermAttribute = tokenStream.addAttribute(CharTermAttribute.class);
+
+		List<String> tokens = new LinkedList<>();
+
+		tokenStream.reset();
+		while (tokenStream.incrementToken()) {
+			tokens.add(charTermAttribute.toString());
+		}
+		return tokens;
+	}
+
+	private Query buildQueryByDescriptionForUser(String username, List<String> searchTokens) {
+
+		BooleanQuery.Builder booleanQueryBuilder = new BooleanQuery.Builder();
+		searchTokens.stream()
+				.forEach(token ->
+						booleanQueryBuilder.add(
+								new TermQuery(
+										new Term(DESCRIPTION.getFieldNameInIndex(), token)),
+								BooleanClause.Occur.MUST));
+
+		booleanQueryBuilder.add(new TermQuery(
+				new Term(USERNAME.getFieldNameInIndex(), username)), BooleanClause.Occur.MUST);
+
+		return booleanQueryBuilder.build();
 	}
 }

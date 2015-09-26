@@ -31,6 +31,10 @@ public class ExpenseEntrySearcherTest {
 	private static final Double MIDDLE_AMOUNT = 20.;
 	private static final Double BIGGEST_AMOUNT = 30.;
 
+	private static final String DESCRIPTION1 = "Test description for first expense entry";
+	private static final String DESCRIPTION2 = "Test description which contains words which diverse from previous description";
+	private static final String DESCRIPTION3 = "Testing text for third entry with some additional terms which describe";
+
 	@Autowired
 	private ExpenseEntrySearcher expenseEntrySearcher;
 
@@ -38,16 +42,16 @@ public class ExpenseEntrySearcherTest {
 	private ExpenseEntryIndexer expenseEntryIndexer;
 
 	private List<String> entriesKeysOrderedByDate;
-	List<ExpenseEntry> testExpenseEntries = new LinkedList<>();
+	private List<ExpenseEntry> testExpenseEntries = new LinkedList<>();
 
 	@Before
 	public void setUp() {
 
 		testExpenseEntries = new LinkedList<>();
-		testExpenseEntries.add(createExpenseEntry(TEST_USER1, LocalDate.now().plusDays(1), SMALLEST_AMOUNT));
-		testExpenseEntries.add(createExpenseEntry(TEST_USER1, LocalDate.now(), MIDDLE_AMOUNT));
-		testExpenseEntries.add(createExpenseEntry(TEST_USER1, LocalDate.now().minusDays(1), BIGGEST_AMOUNT));
-		testExpenseEntries.add(createExpenseEntry(TEST_USER2, LocalDate.now(), MIDDLE_AMOUNT));
+		testExpenseEntries.add(createExpenseEntry(TEST_USER1, LocalDate.now().plusDays(1), SMALLEST_AMOUNT, DESCRIPTION1));
+		testExpenseEntries.add(createExpenseEntry(TEST_USER1, LocalDate.now(), MIDDLE_AMOUNT, DESCRIPTION2));
+		testExpenseEntries.add(createExpenseEntry(TEST_USER1, LocalDate.now().minusDays(1), BIGGEST_AMOUNT, DESCRIPTION3));
+		testExpenseEntries.add(createExpenseEntry(TEST_USER2, LocalDate.now(), MIDDLE_AMOUNT, DESCRIPTION1));
 
 		entriesKeysOrderedByDate = testExpenseEntries.stream()
 				.map(expenseEntry -> expenseEntry.getExpenseCompositeKey().getUniqueKey())
@@ -62,11 +66,11 @@ public class ExpenseEntrySearcherTest {
 				.forEach(e -> expenseEntryIndexer.deleteExpenseEntryFromIndex(e.getExpenseCompositeKey()));
 	}
 
-	private ExpenseEntry createExpenseEntry(String username, LocalDate dateOfExpense, Double amount) {
+	private ExpenseEntry createExpenseEntry(String username, LocalDate dateOfExpense, Double amount, String description) {
 
 		Expense expense = new Expense();
 		expense.setAmount(amount);
-		expense.setDescription("description");
+		expense.setDescription(description);
 		expense.setCurrency(Currency.getInstance("USD"));
 		expense.setDateOfExpense(dateOfExpense);
 
@@ -191,5 +195,60 @@ public class ExpenseEntrySearcherTest {
 
 		assertEquals(1, searchResult.getTotalHits().intValue());
 		assertTrue(foundKeys.contains(entriesKeysOrderedByDate.get(1)));
+	}
+
+	@Test
+	public void testFindAllEntriesByCommonTermFromDescription() {
+
+		ExpenseEntrySearcher.Page page = new ExpenseEntrySearcher.Page(10, 1, ExpenseEntrySearcher.getSortByDateOfExpense());
+		SearchResult<ExpenseCompositeKey> searchResult = expenseEntrySearcher
+				.searchByDescription(TEST_USER1, "test", page);
+
+		Set<String> foundKeys = getFoundKeys(searchResult);
+
+		assertEquals(3, searchResult.getTotalHits().intValue());
+		assertTrue(foundKeys.contains(entriesKeysOrderedByDate.get(0)));
+		assertTrue(foundKeys.contains(entriesKeysOrderedByDate.get(1)));
+		assertTrue(foundKeys.contains(entriesKeysOrderedByDate.get(2)));
+	}
+
+	@Test
+	public void testFindTwoOfEntriesByDescription() {
+
+		ExpenseEntrySearcher.Page page = new ExpenseEntrySearcher.Page(10, 1, ExpenseEntrySearcher.getSortByDateOfExpense());
+		SearchResult<ExpenseCompositeKey> searchResult = expenseEntrySearcher
+				.searchByDescription(TEST_USER1, "entries", page);
+
+		Set<String> foundKeys = getFoundKeys(searchResult);
+
+		assertEquals(2, searchResult.getTotalHits().intValue());
+		assertTrue(foundKeys.contains(entriesKeysOrderedByDate.get(0)));
+		assertTrue(foundKeys.contains(entriesKeysOrderedByDate.get(2)));
+	}
+
+	@Test
+	public void testFindSingleEntryByUniqueTerm() {
+
+		ExpenseEntrySearcher.Page page = new ExpenseEntrySearcher.Page(10, 1, ExpenseEntrySearcher.getSortByDateOfExpense());
+		SearchResult<ExpenseCompositeKey> searchResult = expenseEntrySearcher
+				.searchByDescription(TEST_USER1, "diverse", page);
+
+		Set<String> foundKeys = getFoundKeys(searchResult);
+
+		assertEquals(1, searchResult.getTotalHits().intValue());
+		assertTrue(foundKeys.contains(entriesKeysOrderedByDate.get(1)));
+	}
+
+	@Test
+	public void testFindEntryByMultiTermSearch() {
+
+		ExpenseEntrySearcher.Page page = new ExpenseEntrySearcher.Page(10, 1, ExpenseEntrySearcher.getSortByDateOfExpense());
+		SearchResult<ExpenseCompositeKey> searchResult = expenseEntrySearcher
+				.searchByDescription(TEST_USER1, "third texts", page);
+
+		Set<String> foundKeys = getFoundKeys(searchResult);
+
+		assertEquals(1, searchResult.getTotalHits().intValue());
+		assertTrue(foundKeys.contains(entriesKeysOrderedByDate.get(2)));
 	}
 }
